@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Phoenix · 凤皇 · Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;700&family=Noto+Sans+SC:wght@300;400&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink: #1a0f0a;
+  --paper: #f5efe6;
+  --paper-aged: #ede3d4;
+  --jade: #3a7d6e;
+  --jade-light: #5aad99;
+  --gold: #c8960c;
+  --quartz: #9a78bb;
+  --silver: #6a8fa8;
+  --red-seal: #c0392b;
+  --red-seal-deep: #8B1A1A;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Noto Serif SC', serif;
+  background: var(--paper);
+  color: var(--ink);
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* Paper grain texture */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9996;
+  mix-blend-mode: multiply;
+}
+
+/* ── INK BRUSH CANVAS ── */
+#ink-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 9997;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+/* ── PARALLAX BG ── */
+#bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+.bg-stage {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 1.6s ease;
+}
+.bg-stage.active { opacity: 1; }
+
+/* ── FLOATING DECORATIONS ── */
+.deco-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Chinese lanterns */
+.lantern {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: lanternSway 4s ease-in-out infinite;
+  transform-origin: top center;
+}
+.lantern-body {
+  width: 22px;
+  height: 34px;
+  border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+  position: relative;
+  overflow: hidden;
+}
+.lantern-body::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, rgba(255,255,255,0.25) 0%, transparent 40%, rgba(255,255,255,0.1) 100%);
+  border-radius: inherit;
+}
+.lantern-top {
+  width: 24px;
+  height: 5px;
+  border-radius: 3px 3px 0 0;
+  margin-bottom: -1px;
+}
+.lantern-bottom {
+  width: 24px;
+  height: 5px;
+  border-radius: 0 0 3px 3px;
+  margin-top: -1px;
+}
+.lantern-string {
+  width: 1px;
+  height: 30px;
+  background: rgba(26,15,10,0.2);
+}
+.lantern-tassel {
+  display: flex;
+  gap: 2px;
+}
+.lantern-tassel span {
+  width: 1px;
+  height: 12px;
+  background: rgba(192,57,43,0.5);
+  border-radius: 1px;
+}
+.lantern-red .lantern-body { background: radial-gradient(ellipse at 35% 35%, #e86048, #c0392b 60%, #8B1A1A); }
+.lantern-red .lantern-top, .lantern-red .lantern-bottom { background: #8B1A1A; }
+.lantern-gold .lantern-body { background: radial-gradient(ellipse at 35% 35%, #f5d070, #c8960c 60%, #8a6200); }
+.lantern-gold .lantern-top, .lantern-gold .lantern-bottom { background: #8a6200; }
+
+@keyframes lanternSway {
+  0%,100% { transform: rotate(-4deg); }
+  50% { transform: rotate(4deg); }
+}
+
+/* Falling leaves */
+.leaf {
+  position: absolute;
+  opacity: 0;
+  animation: leafFall linear infinite;
+  pointer-events: none;
+}
+.leaf svg { display: block; }
+@keyframes leafFall {
+  0% { transform: translateY(-60px) rotate(0deg) translateX(0); opacity: 0; }
+  5% { opacity: 0.7; }
+  85% { opacity: 0.5; }
+  100% { transform: translateY(110vh) rotate(720deg) translateX(40px); opacity: 0; }
+}
+
+/* Flying birds */
+.birds-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.bird-flock {
+  position: absolute;
+  animation: birdFly linear infinite;
+  opacity: 0.18;
+}
+@keyframes birdFly {
+  0% { transform: translateX(-200px) translateY(0); opacity: 0; }
+  5% { opacity: 0.18; }
+  90% { opacity: 0.18; }
+  100% { transform: translateX(calc(100vw + 200px)) translateY(-40px); opacity: 0; }
+}
+
+/* Pine tree silhouettes - sides */
+.pine-deco {
+  position: absolute;
+  bottom: 0;
+  pointer-events: none;
+  opacity: 0.12;
+}
+
+/* ── SCROLL CONTAINER ── */
+#scroll-container { position: relative; z-index: 10; }
+
+/* ── HERO ── */
+.hero {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero-mist {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 70% 50% at 50% 60%, rgba(245,239,230,0.55) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-mountains {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 60%;
+  pointer-events: none;
+  will-change: transform;
+}
+.hero-title-wrap {
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+.hero-subtitle {
+  font-family: 'Noto Sans SC', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.5em;
+  color: rgba(26,15,10,0.4);
+  text-transform: uppercase;
+  font-weight: 300;
+  margin-bottom: 1.5rem;
+}
+.hero-name {
+  font-family: 'Noto Serif SC', serif;
+  font-size: clamp(5rem, 14vw, 9.5rem);
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: 0.12em;
+  line-height: 1;
+  position: relative;
+  display: inline-block;
+  cursor: none;
+  text-shadow: 2px 3px 0 rgba(26,15,10,0.07), 5px 8px 16px rgba(26,15,10,0.12), 0 0 60px rgba(26,15,10,0.04);
+  -webkit-text-stroke: 0.5px rgba(26,15,10,0.08);
+  transition: text-shadow 0.4s ease, -webkit-text-fill-color 0.4s ease;
+}
+.hero-name::after {
+  content: attr(data-translation);
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%) scale(0.9);
+  font-size: clamp(1rem, 2.5vw, 1.7rem);
+  font-family: 'IM Fell English', serif;
+  font-style: italic;
+  color: var(--red-seal);
+  letter-spacing: 0.35em;
+  opacity: 0;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  white-space: nowrap;
+  pointer-events: none;
+  text-shadow: 1px 2px 8px rgba(192,57,43,0.4);
+}
+.hero-name:hover { text-shadow: 2px 3px 0 rgba(26,15,10,0.02), 5px 8px 16px rgba(26,15,10,0.04); -webkit-text-fill-color: rgba(26,15,10,0.12); }
+.hero-name:hover::after { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.hero-divider { width: 80px; height: 1px; background: linear-gradient(to right, transparent, var(--ink), transparent); margin: 1.5rem auto; opacity: 0.25; }
+.hero-desc { font-size: 0.85rem; color: rgba(26,15,10,0.45); letter-spacing: 0.25em; font-weight: 300; margin-bottom: 0.4rem; }
+.hero-tagline { font-family: 'Noto Serif SC', serif; font-size: 0.8rem; color: rgba(26,15,10,0.3); letter-spacing: 0.2em; font-weight: 300; font-style: italic; }
+
+/* ── FENG HUANG SEAL ── */
+.feng-huang-seal {
+  position: absolute;
+  bottom: 11%;
+  right: 7%;
+  width: 88px;
+  height: 88px;
+  transform: rotate(-7deg);
+  cursor: none;
+  transition: transform 0.3s ease;
+  filter: drop-shadow(2px 3px 8px rgba(139,26,26,0.35));
+}
+.feng-huang-seal:hover { transform: rotate(-7deg) scale(1.08); }
+
+.scroll-hint {
+  position: absolute;
+  bottom: 6%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  opacity: 0.3;
+  animation: floatHint 2.5s ease-in-out infinite;
+}
+.scroll-hint span { font-size: 0.62rem; letter-spacing: 0.3em; font-family: 'Noto Sans SC', sans-serif; font-weight: 300; }
+.scroll-hint-line { width: 1px; height: 40px; background: linear-gradient(to bottom, var(--ink), transparent); }
+@keyframes floatHint { 0%,100%{transform:translateX(-50%) translateY(0);} 50%{transform:translateX(-50%) translateY(7px);} }
+
+/* ── SECTIONS ── */
+.section { min-height: 100vh; padding: 8rem 5vw; position: relative; }
+.section-inner { max-width: 1100px; margin: 0 auto; }
+
+.section-header { display: flex; align-items: center; gap: 2rem; margin-bottom: 4.5rem; }
+.section-number { font-family: 'Noto Serif SC', serif; font-size: 3.2rem; font-weight: 300; color: rgba(26,15,10,0.1); line-height: 1; }
+.section-title-en { font-size: 0.68rem; letter-spacing: 0.4em; color: rgba(26,15,10,0.32); text-transform: uppercase; font-family: 'Noto Sans SC', sans-serif; font-weight: 300; margin-bottom: 0.3rem; }
+.section-title-zh { font-size: clamp(1.6rem, 3.5vw, 2.5rem); font-weight: 700; letter-spacing: 0.15em; text-shadow: 1px 2px 0 rgba(26,15,10,0.07), 3px 4px 14px rgba(26,15,10,0.1); }
+.section-line { flex: 1; height: 0.5px; background: linear-gradient(to right, rgba(26,15,10,0.18), transparent); }
+
+.brush-divider { display: block; width: 100%; height: 28px; margin: 2.5rem 0 3.5rem; opacity: 0.13; }
+
+/* ── GEM CARDS — AMPLIFIED ── */
+.gems-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.8rem; }
+
+.gem-card {
+  position: relative;
+  padding: 2.2rem 1.8rem 1.8rem;
+  border-radius: 3px;
+  overflow: hidden;
+  cursor: none;
+  transition: transform 0.45s cubic-bezier(.23,1,.32,1), box-shadow 0.45s ease;
+  isolation: isolate;
+}
+.gem-card:hover { transform: translateY(-10px) rotate(0.5deg) scale(1.02); }
+
+/* — JADE — deep, translucent, layered green stone */
+.gem-jade {
+  background:
+    radial-gradient(ellipse 55% 45% at 28% 25%, rgba(120,210,185,0.55), transparent 60%),
+    radial-gradient(ellipse 70% 55% at 80% 80%, rgba(20,70,60,0.35), transparent 55%),
+    radial-gradient(ellipse 40% 35% at 60% 10%, rgba(180,240,220,0.4), transparent 50%),
+    linear-gradient(145deg, #c8f0e4 0%, #8dd8c0 25%, #4aab90 55%, #2a7060 80%, #1a4f44 100%);
+  border: 1px solid rgba(58,125,110,0.6);
+  box-shadow:
+    inset 0 1px 0 rgba(200,255,235,0.7),
+    inset -1px -1px 0 rgba(20,60,50,0.2),
+    inset 2px 2px 8px rgba(150,220,200,0.3),
+    0 8px 32px rgba(30,100,85,0.3),
+    0 2px 8px rgba(30,100,85,0.2);
+}
+.gem-jade:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(200,255,235,0.7),
+    inset -1px -1px 0 rgba(20,60,50,0.2),
+    inset 2px 2px 8px rgba(150,220,200,0.3),
+    0 20px 50px rgba(30,100,85,0.45),
+    0 6px 16px rgba(30,100,85,0.3),
+    0 0 30px rgba(90,180,155,0.25);
+}
+.gem-jade .gem-highlight {
+  position: absolute;
+  top: 8px; left: 12px;
+  width: 55px; height: 20px;
+  background: rgba(220,255,245,0.55);
+  border-radius: 50%;
+  filter: blur(6px);
+  pointer-events: none;
+}
+.gem-jade .gem-title { color: #0d3028; }
+.gem-jade .gem-desc { color: rgba(15,55,45,0.75); }
+.gem-jade .gem-name { color: rgba(15,60,50,0.65); }
+
+/* — GOLD — warm, glowing, rich amber ore */
+.gem-gold {
+  background:
+    radial-gradient(ellipse 50% 40% at 25% 22%, rgba(255,235,140,0.75), transparent 55%),
+    radial-gradient(ellipse 65% 50% at 82% 78%, rgba(140,85,5,0.4), transparent 50%),
+    radial-gradient(ellipse 35% 30% at 55% 8%, rgba(255,248,180,0.5), transparent 45%),
+    linear-gradient(145deg, #fff0a0 0%, #f5d050 22%, #d4960a 52%, #a06800 78%, #6e4400 100%);
+  border: 1px solid rgba(200,150,10,0.65);
+  box-shadow:
+    inset 0 1px 0 rgba(255,248,200,0.8),
+    inset -1px -1px 0 rgba(100,60,0,0.25),
+    inset 2px 2px 10px rgba(255,220,80,0.35),
+    0 8px 32px rgba(180,120,0,0.35),
+    0 2px 8px rgba(180,120,0,0.25);
+}
+.gem-gold:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255,248,200,0.8),
+    inset -1px -1px 0 rgba(100,60,0,0.25),
+    inset 2px 2px 10px rgba(255,220,80,0.35),
+    0 20px 50px rgba(200,140,0,0.5),
+    0 6px 18px rgba(200,140,0,0.35),
+    0 0 35px rgba(240,190,40,0.3);
+}
+.gem-gold .gem-highlight {
+  position: absolute;
+  top: 6px; left: 10px;
+  width: 60px; height: 18px;
+  background: rgba(255,252,210,0.65);
+  border-radius: 50%;
+  filter: blur(7px);
+  pointer-events: none;
+}
+.gem-gold .gem-title { color: #3d2200; }
+.gem-gold .gem-desc { color: rgba(70,40,0,0.75); }
+.gem-gold .gem-name { color: rgba(80,50,0,0.65); }
+
+/* — QUARTZ — crystalline, purple-white, faceted */
+.gem-quartz {
+  background:
+    radial-gradient(ellipse 45% 40% at 22% 18%, rgba(255,250,255,0.85), transparent 50%),
+    radial-gradient(ellipse 60% 50% at 80% 80%, rgba(130,90,200,0.35), transparent 52%),
+    radial-gradient(ellipse 35% 28% at 65% 12%, rgba(240,225,255,0.6), transparent 45%),
+    linear-gradient(145deg, #f8f4ff 0%, #e4d5f8 20%, #c4a8ec 50%, #9a6ed4 78%, #6b3faa 100%);
+  border: 1px solid rgba(160,120,220,0.55);
+  box-shadow:
+    inset 0 1px 0 rgba(255,250,255,0.9),
+    inset -1px -1px 0 rgba(80,40,150,0.2),
+    inset 2px 2px 10px rgba(220,200,255,0.4),
+    0 8px 32px rgba(130,80,200,0.28),
+    0 2px 8px rgba(130,80,200,0.2);
+}
+.gem-quartz:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255,250,255,0.9),
+    inset -1px -1px 0 rgba(80,40,150,0.2),
+    inset 2px 2px 10px rgba(220,200,255,0.4),
+    0 20px 50px rgba(150,90,220,0.42),
+    0 6px 18px rgba(150,90,220,0.28),
+    0 0 30px rgba(200,170,255,0.3);
+}
+.gem-quartz .gem-highlight {
+  position: absolute;
+  top: 7px; left: 11px;
+  width: 50px; height: 16px;
+  background: rgba(255,252,255,0.75);
+  border-radius: 50%;
+  filter: blur(5px);
+  pointer-events: none;
+}
+/* Facet lines */
+.gem-quartz::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 35%;
+  width: 1px; height: 100%;
+  background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.25) 30%, rgba(255,255,255,0.35) 60%, transparent);
+  pointer-events: none;
+}
+.gem-quartz .gem-title { color: #2a0a55; }
+.gem-quartz .gem-desc { color: rgba(50,20,100,0.72); }
+.gem-quartz .gem-name { color: rgba(60,30,120,0.6); }
+
+/* — SILVER — cool, metallic, lustrous */
+.gem-silver {
+  background:
+    radial-gradient(ellipse 50% 40% at 24% 20%, rgba(245,252,255,0.85), transparent 52%),
+    radial-gradient(ellipse 60% 50% at 82% 80%, rgba(60,100,130,0.35), transparent 50%),
+    radial-gradient(ellipse 30% 25% at 60% 10%, rgba(220,240,255,0.55), transparent 45%),
+    linear-gradient(145deg, #f0f8ff 0%, #d0e8f5 20%, #a8c8e0 48%, #6a9ab8 76%, #3a6a88 100%);
+  border: 1px solid rgba(100,155,190,0.55);
+  box-shadow:
+    inset 0 1px 0 rgba(240,252,255,0.85),
+    inset -1px -1px 0 rgba(40,80,110,0.2),
+    inset 2px 2px 8px rgba(190,225,245,0.35),
+    0 8px 32px rgba(60,110,155,0.28),
+    0 2px 8px rgba(60,110,155,0.2);
+}
+.gem-silver:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(240,252,255,0.85),
+    inset -1px -1px 0 rgba(40,80,110,0.2),
+    inset 2px 2px 8px rgba(190,225,245,0.35),
+    0 20px 50px rgba(70,130,175,0.42),
+    0 6px 18px rgba(70,130,175,0.28),
+    0 0 28px rgba(140,200,235,0.3);
+}
+.gem-silver .gem-highlight {
+  position: absolute;
+  top: 8px; left: 10px;
+  width: 58px; height: 17px;
+  background: rgba(235,250,255,0.7);
+  border-radius: 50%;
+  filter: blur(6px);
+  pointer-events: none;
+}
+/* Metallic stripe */
+.gem-silver::before {
+  content: '';
+  position: absolute;
+  top: 20%; left: 0;
+  width: 100%; height: 18%;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.18) 30%, rgba(255,255,255,0.28) 50%, rgba(255,255,255,0.18) 70%, transparent);
+  pointer-events: none;
+}
+.gem-silver .gem-title { color: #0d2535; }
+.gem-silver .gem-desc { color: rgba(15,50,75,0.72); }
+.gem-silver .gem-name { color: rgba(20,60,90,0.6); }
+
+/* Gem shared */
+.gem-icon { width: 44px; height: 44px; margin-bottom: 1.3rem; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.2)); }
+.gem-name { font-size: 0.58rem; letter-spacing: 0.45em; text-transform: uppercase; font-family: 'Noto Sans SC', sans-serif; font-weight: 300; margin-bottom: 0.5rem; opacity: 0.7; }
+.gem-title { font-size: 1.05rem; font-weight: 700; letter-spacing: 0.04em; line-height: 1.3; margin-bottom: 0.6rem; }
+.gem-desc { font-size: 0.8rem; font-weight: 300; line-height: 1.65; font-family: 'Noto Sans SC', sans-serif; }
+.gem-badge {
+  display: inline-block;
+  margin-top: 1.1rem;
+  padding: 3px 10px;
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  font-family: 'Noto Sans SC', sans-serif;
+  font-weight: 300;
+  border-radius: 1px;
+  border: 0.5px solid rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.25);
+  backdrop-filter: blur(4px);
+}
+.gem-jade .gem-badge { color: #0d3028; }
+.gem-gold .gem-badge { color: #3d2200; }
+.gem-quartz .gem-badge { color: #2a0a55; }
+.gem-silver .gem-badge { color: #0d2535; }
+
+/* ── CERTIFICATIONS ── */
+.certs-list { display: flex; flex-direction: column; }
+
+.cert-row {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  align-items: center;
+  gap: 2rem;
+  padding: 2rem 1rem;
+  border-bottom: 0.5px solid rgba(26,15,10,0.1);
+  position: relative;
+  overflow: hidden;
+  transition: padding-left 0.4s ease, background 0.4s ease;
+  border-radius: 2px;
+}
+.cert-row:hover { padding-left: 2rem; background: rgba(255,255,255,0.3); }
+.cert-row::after {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 0;
+  transition: width 0.5s cubic-bezier(.23,1,.32,1);
+}
+.cert-row:hover::after { width: 100%; }
+.cert-row-jade::after { background: linear-gradient(to right, rgba(74,171,144,0.12), transparent); }
+.cert-row-gold::after { background: linear-gradient(to right, rgba(232,184,42,0.12), transparent); }
+.cert-row-quartz::after { background: linear-gradient(to right, rgba(180,140,230,0.14), transparent); }
+.cert-row-silver::after { background: linear-gradient(to right, rgba(106,154,184,0.12), transparent); }
+
+/* Gem pebble shape */
+.cert-gem-dot {
+  width: 20px;
+  height: 28px;
+  border-radius: 50% 50% 45% 45% / 55% 55% 45% 45%;
+  justify-self: center;
+  flex-shrink: 0;
+  position: relative;
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.25));
+}
+.cert-gem-dot::after {
+  content: '';
+  position: absolute;
+  top: 3px; left: 4px;
+  width: 8px; height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.55);
+}
+.dot-jade { background: linear-gradient(145deg, #8dddc8 0%, #3a9d82 50%, #1e5045 100%); border: 0.5px solid rgba(30,80,65,0.4); }
+.dot-gold { background: linear-gradient(145deg, #f5e090 0%, #d4a010 50%, #8a5c00 100%); border: 0.5px solid rgba(130,90,0,0.4); }
+.dot-quartz { background: linear-gradient(145deg, #ead0f8 0%, #a870d8 50%, #6030a0 100%); border: 0.5px solid rgba(90,40,160,0.4); }
+.dot-silver { background: linear-gradient(145deg, #d8eef8 0%, #7aaec8 50%, #3a6888 100%); border: 0.5px solid rgba(50,90,130,0.4); }
+
+.cert-info {}
+.cert-name { font-size: 1rem; font-weight: 700; letter-spacing: 0.03em; margin-bottom: 0.25rem; }
+.cert-issuer { font-size: 0.73rem; font-family: 'Noto Sans SC', sans-serif; font-weight: 300; color: rgba(26,15,10,0.42); letter-spacing: 0.1em; }
+.cert-year { font-family: 'IM Fell English', serif; font-style: italic; font-size: 1.4rem; color: rgba(26,15,10,0.18); letter-spacing: 0.05em; }
+
+/* ── ABOUT ── */
+.philosophy-wrap { display: grid; grid-template-columns: 1fr 2fr; gap: 5rem; align-items: start; }
+.philosophy-char { font-family: 'Noto Serif SC', serif; font-size: clamp(5rem,11vw,9rem); font-weight: 700; color: var(--ink); line-height: 1; opacity: 0.07; text-shadow: 3px 5px 12px rgba(26,15,10,0.25); user-select: none; }
+.philosophy-text h3 { font-size: 1.35rem; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 1.4rem; }
+.philosophy-text p { font-size: 0.88rem; line-height: 2; color: rgba(26,15,10,0.62); font-weight: 300; margin-bottom: 1.1rem; font-family: 'IM Fell English', serif; font-style: italic; }
+
+/* ── TESTIMONIALS ── */
+.testimonials-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem; }
+.testimonial-card {
+  padding: 2.5rem 2rem;
+  position: relative;
+  background: rgba(245,239,230,0.5);
+  border: 0.5px solid rgba(26,15,10,0.1);
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 0.5px rgba(26,15,10,0.04), 0 2px 20px rgba(26,15,10,0.05);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+.testimonial-card:hover { box-shadow: inset 0 0 0 0.5px rgba(26,15,10,0.04), 0 8px 30px rgba(26,15,10,0.1); transform: translateY(-4px); }
+.testimonial-card::before { content: '❝'; position: absolute; top: 0.8rem; left: 1.2rem; font-size: 4.5rem; line-height: 1; color: rgba(26,15,10,0.05); font-family: 'IM Fell English', serif; pointer-events: none; }
+.testimonial-text { font-size: 0.88rem; line-height: 1.95; color: rgba(26,15,10,0.68); font-weight: 300; font-style: italic; font-family: 'IM Fell English', serif; margin-bottom: 1.5rem; position: relative; z-index: 1; }
+.testimonial-author { display: flex; align-items: center; gap: 0.8rem; }
+.author-seal {
+  width: 38px; height: 38px;
+  border: 1.5px solid rgba(192,57,43,0.35);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem; color: var(--red-seal);
+  font-family: 'Noto Serif SC', serif; font-weight: 700;
+  opacity: 0.75; transform: rotate(-4deg);
+  flex-shrink: 0;
+  box-shadow: inset 0 0 0 2px rgba(192,57,43,0.08);
+}
+.author-name { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 0.15rem; }
+.author-role { font-size: 0.7rem; font-family: 'Noto Sans SC', sans-serif; font-weight: 300; color: rgba(26,15,10,0.38); letter-spacing: 0.1em; }
+
+/* ── CONTACT ── */
+.contact-section { min-height: 60vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 8rem 5vw; }
+.contact-inner { max-width: 600px; }
+.contact-title { font-size: clamp(2rem,5vw,3.2rem); font-weight: 700; letter-spacing: 0.15em; margin-bottom: 0.8rem; text-shadow: 1px 2px 0 rgba(26,15,10,0.07), 3px 4px 14px rgba(26,15,10,0.1); }
+.contact-sub { font-size: 0.78rem; letter-spacing: 0.3em; color: rgba(26,15,10,0.32); text-transform: uppercase; font-family: 'Noto Sans SC', sans-serif; font-weight: 300; margin-bottom: 3rem; }
+.contact-links { display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; }
+.contact-link { font-size: 0.78rem; letter-spacing: 0.25em; text-transform: uppercase; font-family: 'Noto Sans SC', sans-serif; font-weight: 300; color: rgba(26,15,10,0.45); text-decoration: none; border-bottom: 0.5px solid transparent; transition: color 0.3s, border-color 0.3s; padding-bottom: 2px; }
+.contact-link:hover { color: var(--ink); border-color: rgba(26,15,10,0.3); }
+
+/* ── FOOTER ── */
+footer { text-align: center; padding: 2rem; font-size: 0.68rem; letter-spacing: 0.2em; color: rgba(26,15,10,0.2); font-family: 'Noto Sans SC', sans-serif; font-weight: 300; border-top: 0.5px solid rgba(26,15,10,0.08); }
+
+/* ── MIST OVERLAYS ── */
+.mist-overlay { position: absolute; left: 0; right: 0; height: 180px; pointer-events: none; z-index: 1; }
+.mist-top { top: 0; background: linear-gradient(to bottom, var(--paper) 0%, transparent 100%); }
+.mist-bottom { bottom: 0; background: linear-gradient(to top, var(--paper) 0%, transparent 100%); }
+
+/* ── REVEAL ── */
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.95s cubic-bezier(.23,1,.32,1), transform 0.95s cubic-bezier(.23,1,.32,1); }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.22s; }
+.reveal-delay-3 { transition-delay: 0.36s; }
+.reveal-delay-4 { transition-delay: 0.52s; }
+
+@media (max-width: 768px) {
+  .philosophy-wrap { grid-template-columns: 1fr; gap: 2rem; }
+  .cert-row { grid-template-columns: 40px 1fr auto; gap: 1rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── INK BRUSH CANVAS ── -->
+<canvas id="ink-canvas"></canvas>
+
+<!-- ── PARALLAX BACKGROUNDS ── -->
+<div id="bg-canvas">
+
+  <!-- Stage 0: Dawn mist -->
+  <div class="bg-stage active" id="stage-0">
+    <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax slice" style="position:absolute;inset:0">
+      <defs><filter id="s0b1"><feGaussianBlur stdDeviation="3"/></filter><filter id="s0b2"><feGaussianBlur stdDeviation="8"/></filter><filter id="s0b3"><feGaussianBlur stdDeviation="20"/></filter></defs>
+      <rect width="100%" height="100%" fill="#f0e8dc"/>
+      <ellipse cx="50%" cy="92%" rx="70%" ry="18%" fill="rgba(200,210,190,0.25)" filter="url(#s0b3)"/>
+      <path d="M0,78% L8%,55% L15%,65% L22%,42% L30%,58% L38%,38% L45%,52% L52%,35% L60%,50% L67%,40% L74%,52% L82%,44% L90%,55% L100%,60% L100%,100% L0,100% Z" fill="rgba(150,160,148,0.16)" filter="url(#s0b3)"/>
+      <path d="M0,85% L12%,68% L20%,76% L28%,60% L36%,72% L44%,62% L52%,74% L60%,65% L68%,75% L76%,68% L84%,76% L92%,70% L100%,72% L100%,100% L0,100% Z" fill="rgba(100,120,105,0.2)" filter="url(#s0b2)"/>
+      <path d="M0,92% L10%,82% L20%,88% L30%,78% L40%,86% L50%,80% L60%,88% L70%,82% L80%,88% L90%,83% L100%,86% L100%,100% L0,100% Z" fill="rgba(60,80,58,0.26)" filter="url(#s0b1)"/>
+      <rect y="60%" width="100%" height="20%" fill="rgba(245,242,235,0.42)" filter="url(#s0b3)"/>
+      <rect y="75%" width="100%" height="15%" fill="rgba(240,238,230,0.32)" filter="url(#s0b3)"/>
+      <!-- Pine tree left -->
+      <g filter="url(#s0b1)" opacity="0.2">
+        <polygon points="35,100% 25,78% 40,82% 20,62% 38,68% 18,45% 35,52% 28,25% 42,38% 35,0" fill="#2d4a28" transform="scale(0.08,0.5) translate(-100,100)"/>
+      </g>
+    </svg>
+  </div>
+
+  <!-- Stage 1: Bamboo forest -->
+  <div class="bg-stage" id="stage-1">
+    <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax slice" style="position:absolute;inset:0">
+      <defs><filter id="s1b1"><feGaussianBlur stdDeviation="4"/></filter><filter id="s1b2"><feGaussianBlur stdDeviation="12"/></filter><filter id="s1b3"><feGaussianBlur stdDeviation="25"/></filter></defs>
+      <rect width="100%" height="100%" fill="#e8ede4"/>
+      <ellipse cx="50%" cy="50%" rx="60%" ry="40%" fill="rgba(160,185,155,0.2)" filter="url(#s1b3)"/>
+      <line x1="15%" y1="0" x2="14%" y2="100%" stroke="rgba(60,100,55,0.1)" stroke-width="25" filter="url(#s1b2)"/>
+      <line x1="28%" y1="0" x2="27%" y2="100%" stroke="rgba(60,100,55,0.08)" stroke-width="18" filter="url(#s1b2)"/>
+      <line x1="52%" y1="0" x2="53%" y2="100%" stroke="rgba(60,100,55,0.07)" stroke-width="30" filter="url(#s1b2)"/>
+      <line x1="72%" y1="0" x2="71%" y2="100%" stroke="rgba(60,100,55,0.09)" stroke-width="20" filter="url(#s1b2)"/>
+      <line x1="88%" y1="0" x2="87%" y2="100%" stroke="rgba(60,100,55,0.06)" stroke-width="15" filter="url(#s1b2)"/>
+      <!-- bamboo nodes -->
+      <ellipse cx="15%" cy="25%" rx="2%" ry="0.5%" fill="rgba(50,90,45,0.15)" filter="url(#s1b1)"/>
+      <ellipse cx="15%" cy="55%" rx="2%" ry="0.5%" fill="rgba(50,90,45,0.15)" filter="url(#s1b1)"/>
+      <ellipse cx="28%" cy="35%" rx="1.5%" ry="0.4%" fill="rgba(50,90,45,0.12)" filter="url(#s1b1)"/>
+      <ellipse cx="28%" cy="70%" rx="1.5%" ry="0.4%" fill="rgba(50,90,45,0.12)" filter="url(#s1b1)"/>
+      <!-- bamboo leaves -->
+      <ellipse cx="16%" cy="20%" rx="4%" ry="1%" fill="rgba(80,130,70,0.12)" filter="url(#s1b2)" transform="rotate(-25,16%,20%)"/>
+      <ellipse cx="52%" cy="15%" rx="5%" ry="1.2%" fill="rgba(80,130,70,0.1)" filter="url(#s1b2)" transform="rotate(20,52%,15%)"/>
+      <path d="M0,88% Q25,82% 50,88% Q75,94% 100,88% L100%,100% L0,100% Z" fill="rgba(58,125,110,0.1)" filter="url(#s1b2)"/>
+      <rect y="90%" width="100%" height="10%" fill="rgba(40,90,55,0.18)" filter="url(#s1b1)"/>
+      <rect y="0" width="100%" height="20%" fill="rgba(235,240,232,0.5)" filter="url(#s1b3)"/>
+    </svg>
+  </div>
+
+  <!-- Stage 2: Mountain peaks -->
+  <div class="bg-stage" id="stage-2">
+    <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax slice" style="position:absolute;inset:0">
+      <defs><filter id="s2b1"><feGaussianBlur stdDeviation="2"/></filter><filter id="s2b2"><feGaussianBlur stdDeviation="8"/></filter><filter id="s2b3"><feGaussianBlur stdDeviation="22"/></filter></defs>
+      <rect width="100%" height="100%" fill="#eae8e2"/>
+      <ellipse cx="50%" cy="25%" rx="40%" ry="30%" fill="rgba(235,215,175,0.18)" filter="url(#s2b3)"/>
+      <path d="M0,75% L5%,55% L12%,68% L20%,45% L28%,60% L35%,40% L42%,55% L50%,30% L58%,48% L65%,35% L72%,52% L80%,38% L87%,55% L95%,42% L100%,50% L100%,100% L0,100% Z" fill="rgba(140,135,125,0.11)" filter="url(#s2b3)"/>
+      <path d="M-5%,82% L5%,62% L15%,74% L25%,55% L35%,68% L45%,52% L55%,65% L65%,50% L75%,62% L85%,55% L95%,65% L105%,58% L105%,100% L-5%,100% Z" fill="rgba(100,95,88,0.17)" filter="url(#s2b2)"/>
+      <path d="M0,88% L15%,78% L22%,85% L32%,72% L42%,80% L52%,75% L62%,82% L72%,76% L82%,83% L92%,78% L100%,80% L100%,100% L0,100% Z" fill="rgba(65,62,55,0.22)" filter="url(#s2b1)"/>
+      <!-- Waterfall suggestion -->
+      <line x1="67%" y1="35%" x2="65%" y2="72%" stroke="rgba(200,215,225,0.3)" stroke-width="3" filter="url(#s2b2)"/>
+      <rect y="58%" width="100%" height="12%" fill="rgba(245,242,238,0.48)" filter="url(#s2b3)"/>
+      <rect y="72%" width="100%" height="8%" fill="rgba(242,240,235,0.32)" filter="url(#s2b3)"/>
+    </svg>
+  </div>
+
+  <!-- Stage 3: River valley -->
+  <div class="bg-stage" id="stage-3">
+    <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax slice" style="position:absolute;inset:0">
+      <defs><filter id="s3b1"><feGaussianBlur stdDeviation="3"/></filter><filter id="s3b2"><feGaussianBlur stdDeviation="10"/></filter><filter id="s3b3"><feGaussianBlur stdDeviation="25"/></filter></defs>
+      <rect width="100%" height="100%" fill="#e5eaee"/>
+      <ellipse cx="50%" cy="75%" rx="35%" ry="8%" fill="rgba(180,210,225,0.38)" filter="url(#s3b3)"/>
+      <path d="M0,80% Q20%,70% 40%,78% Q60%,86% 80%,74% Q90%,68% 100%,76% L100%,100% L0,100% Z" fill="rgba(100,130,115,0.14)" filter="url(#s3b3)"/>
+      <path d="M0,86% Q15%,76% 30%,84% Q50%,92% 70%,80% Q85%,72% 100%,82% L100%,100% L0,100% Z" fill="rgba(80,110,100,0.2)" filter="url(#s3b2)"/>
+      <path d="M0,92% Q30%,88% 60%,91% Q80%,94% 100%,89% L100%,100% L0,100% Z" fill="rgba(60,90,80,0.28)" filter="url(#s3b1)"/>
+      <!-- River ripples -->
+      <ellipse cx="35%" cy="85%" rx="12%" ry="1.5%" fill="rgba(140,180,200,0.2)" filter="url(#s3b2)"/>
+      <ellipse cx="65%" cy="88%" rx="10%" ry="1.2%" fill="rgba(140,180,200,0.18)" filter="url(#s3b2)"/>
+      <ellipse cx="50%" cy="85%" rx="40%" ry="4%" fill="rgba(140,180,200,0.22)" filter="url(#s3b2)"/>
+      <rect y="0" width="100%" height="25%" fill="rgba(230,236,240,0.58)" filter="url(#s3b3)"/>
+    </svg>
+  </div>
+
+  <!-- Stage 4: Dusk red sun -->
+  <div class="bg-stage" id="stage-4">
+    <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax slice" style="position:absolute;inset:0">
+      <defs><filter id="s4b1"><feGaussianBlur stdDeviation="4"/></filter><filter id="s4b2"><feGaussianBlur stdDeviation="15"/></filter><filter id="s4b3"><feGaussianBlur stdDeviation="30"/></filter></defs>
+      <rect width="100%" height="100%" fill="#eee5d4"/>
+      <circle cx="50%" cy="34%" r="14%" fill="rgba(192,57,43,0.18)" filter="url(#s4b3)"/>
+      <circle cx="50%" cy="34%" r="7%" fill="rgba(215,80,50,0.28)" filter="url(#s4b2)"/>
+      <rect y="0" width="100%" height="50%" fill="rgba(235,200,140,0.09)" filter="url(#s4b3)"/>
+      <path d="M0,80% L10%,65% L20%,72% L30%,58% L40%,68% L50%,55% L60%,65% L70%,58% L80%,68% L90%,62% L100%,70% L100%,100% L0,100% Z" fill="rgba(60,45,30,0.2)" filter="url(#s4b2)"/>
+      <path d="M0,88% L12%,78% L25%,84% L38%,74% L50%,80% L62%,75% L75%,82% L88%,76% L100%,82% L100%,100% L0,100% Z" fill="rgba(45,32,18,0.3)" filter="url(#s4b1)"/>
+      <rect y="94%" width="100%" height="6%" fill="rgba(35,25,12,0.35)"/>
+      <ellipse cx="50%" cy="96%" rx="30%" ry="3%" fill="rgba(240,195,90,0.1)" filter="url(#s4b2)"/>
+    </svg>
+  </div>
+
+  <!-- Decorations: Lanterns (hero) -->
+  <div class="deco-layer" id="deco-lanterns" style="opacity:0;transition:opacity 1s ease;">
+    <div class="lantern lantern-red" style="position:absolute;top:5%;left:5%;animation-delay:0s;">
+      <div class="lantern-string"></div>
+      <div class="lantern-top"></div>
+      <div class="lantern-body"></div>
+      <div class="lantern-bottom"></div>
+      <div class="lantern-tassel"><span></span><span></span><span></span></div>
+    </div>
+    <div class="lantern lantern-gold" style="position:absolute;top:8%;left:12%;animation-delay:0.7s;">
+      <div class="lantern-string"></div>
+      <div class="lantern-top"></div>
+      <div class="lantern-body"></div>
+      <div class="lantern-bottom"></div>
+      <div class="lantern-tassel"><span></span><span></span><span></span></div>
+    </div>
+    <div class="lantern lantern-red" style="position:absolute;top:4%;right:8%;animation-delay:1.2s;">
+      <div class="lantern-string"></div>
+      <div class="lantern-top"></div>
+      <div class="lantern-body"></div>
+      <div class="lantern-bottom"></div>
+      <div class="lantern-tassel"><span></span><span></span><span></span></div>
+    </div>
+    <div class="lantern lantern-gold" style="position:absolute;top:10%;right:16%;animation-delay:0.4s;">
+      <div class="lantern-string"></div>
+      <div class="lantern-top"></div>
+      <div class="lantern-body"></div>
+      <div class="lantern-bottom"></div>
+      <div class="lantern-tassel"><span></span><span></span><span></span></div>
+    </div>
+  </div>
+
+  <!-- Falling leaves layer -->
+  <div id="leaves-layer" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;"></div>
+
+  <!-- Birds layer -->
+  <div class="birds-layer" id="birds-layer"></div>
+
+</div>
+
+<!-- ── SCROLL CONTENT ── -->
+<div id="scroll-container">
+
+  <!-- ── HERO ── -->
+  <section class="hero" id="hero">
+    <div class="hero-mist"></div>
+
+    <svg class="hero-mountains" viewBox="0 0 1440 400" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax meet">
+      <defs>
+        <filter id="hb1"><feGaussianBlur stdDeviation="1"/></filter>
+        <filter id="hb2"><feGaussianBlur stdDeviation="4"/></filter>
+        <filter id="hb3"><feGaussianBlur stdDeviation="12"/></filter>
+      </defs>
+      <path d="M0,300 L60,200 L120,240 L180,170 L260,210 L340,155 L420,195 L500,140 L580,180 L660,145 L740,175 L820,155 L900,190 L980,160 L1060,185 L1140,165 L1220,188 L1300,170 L1380,180 L1440,175 L1440,400 L0,400 Z" fill="rgba(100,110,100,0.12)" filter="url(#hb3)"/>
+      <path d="M0,330 L80,255 L140,280 L200,240 L280,265 L350,235 L420,258 L490,225 L560,248 L640,232 L720,252 L800,238 L880,255 L960,240 L1040,258 L1120,242 L1200,260 L1300,248 L1440,255 L1440,400 L0,400 Z" fill="rgba(70,85,68,0.18)" filter="url(#hb2)"/>
+      <path d="M0,360 L100,320 L180,338 L260,310 L360,328 L450,315 L540,330 L640,318 L740,330 L840,320 L940,335 L1040,322 L1140,338 L1240,325 L1340,335 L1440,325 L1440,400 L0,400 Z" fill="rgba(45,60,42,0.25)" filter="url(#hb1)"/>
+      <path d="M0,380 Q360,370 720,378 Q1080,386 1440,375 L1440,400 L0,400 Z" fill="rgba(30,50,28,0.3)"/>
+      <rect x="0" y="260" width="1440" height="60" fill="rgba(245,242,235,0.4)" filter="url(#hb3)"/>
+      <rect x="0" y="330" width="1440" height="40" fill="rgba(242,240,232,0.3)" filter="url(#hb3)"/>
+    </svg>
+
+    <div class="hero-title-wrap" id="hero-title">
+      <p class="hero-subtitle">Portfolio · 作品集</p>
+      <h1 class="hero-name" data-translation="PHOENIX">凤皇</h1>
+      <div class="hero-divider"></div>
+      <p class="hero-desc">Crafting modern interfaces with ink-wash spirit.</p>
+      <p class="hero-tagline">以技为笔，绘数字之美</p>
+    </div>
+
+    <!-- FENG HUANG SEAL - proper Chinese stamp -->
+    <svg class="feng-huang-seal" viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="sealDistress">
+          <feTurbulence type="fractalNoise" baseFrequency="0.065" numOctaves="4" seed="3" result="noise"/>
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.8" xChannelSelector="R" yChannelSelector="G"/>
+        </filter>
+        <filter id="sealInk">
+          <feGaussianBlur stdDeviation="0.4"/>
+          <feComponentTransfer><feFuncA type="discrete" tableValues="0 1"/></feComponentTransfer>
+        </filter>
+      </defs>
+      <!-- Outer border - double line like real hanzhi seal -->
+      <rect x="3" y="3" width="82" height="82" rx="2" ry="2" fill="none" stroke="#c0392b" stroke-width="3.5" filter="url(#sealDistress)"/>
+      <rect x="6.5" y="6.5" width="75" height="75" rx="1" ry="1" fill="none" stroke="#c0392b" stroke-width="1.2" filter="url(#sealDistress)"/>
+      <!-- Inner fill wash -->
+      <rect x="5" y="5" width="78" height="78" rx="1" fill="rgba(192,57,43,0.04)"/>
+      <!-- Vertical center divider -->
+      <line x1="44" y1="8" x2="44" y2="80" stroke="#c0392b" stroke-width="1" opacity="0.35" filter="url(#sealDistress)"/>
+      <!-- 凤 top left / 皇 top right — seal script style rendered large -->
+      <text x="22" y="50" font-family="Noto Serif SC, serif" font-size="34" font-weight="700" fill="#c0392b" text-anchor="middle" dominant-baseline="middle" filter="url(#sealDistress)" letter-spacing="-1">凤</text>
+      <text x="66" y="50" font-family="Noto Serif SC, serif" font-size="34" font-weight="700" fill="#c0392b" text-anchor="middle" dominant-baseline="middle" filter="url(#sealDistress)" letter-spacing="-1">皇</text>
+      <!-- Wear marks - authentic look -->
+      <rect x="3" y="3" width="12" height="4" rx="1" fill="#c0392b" opacity="0.15"/>
+      <rect x="73" y="81" width="12" height="4" rx="1" fill="#c0392b" opacity="0.12"/>
+      <circle cx="8" cy="8" r="2" fill="rgba(192,57,43,0.2)"/>
+      <circle cx="80" cy="80" r="1.5" fill="rgba(192,57,43,0.15)"/>
+    </svg>
+
+    <div class="scroll-hint" id="scroll-hint">
+      <span>展开</span>
+      <div class="scroll-hint-line"></div>
+    </div>
+  </section>
+
+  <!-- ── SKILLS ── -->
+  <section class="section" id="skills">
+    <div class="mist-overlay mist-top"></div>
+    <!-- Decorative pine branches -->
+    <svg style="position:absolute;top:0;right:0;width:180px;height:300px;opacity:0.07;pointer-events:none;overflow:visible;" viewBox="0 0 180 300">
+      <path d="M160,0 Q140,40 155,80 Q130,60 100,90 Q135,90 130,130 Q100,110 70,140 Q115,135 105,180 Q80,160 50,195 Q100,185 90,240 Q65,220 40,260" stroke="#2d4a28" stroke-width="2.5" fill="none"/>
+      <path d="M155,80 Q165,65 175,55" stroke="#2d4a28" stroke-width="1.5" fill="none"/>
+      <path d="M100,90 Q85,75 80,60" stroke="#2d4a28" stroke-width="1.5" fill="none"/>
+      <path d="M130,130 Q148,115 158,100" stroke="#2d4a28" stroke-width="1.5" fill="none"/>
+      <path d="M70,140 Q55,125 50,110" stroke="#2d4a28" stroke-width="1.5" fill="none"/>
+      <path d="M105,180 Q120,162 132,150" stroke="#2d4a28" stroke-width="1.5" fill="none"/>
+    </svg>
+    <div class="section-inner">
+      <div class="section-header reveal">
+        <div class="section-number">一</div>
+        <div class="section-title-block">
+          <div class="section-title-en">Skills & Expertise</div>
+          <div class="section-title-zh">技艺之碧玉</div>
+        </div>
+        <div class="section-line"></div>
+      </div>
+      <svg class="brush-divider" viewBox="0 0 800 28" xmlns="http://www.w3.org/2000/svg"><defs><filter id="bi1"><feGaussianBlur stdDeviation="1.5"/></filter></defs><path d="M20,14 Q100,4 200,13 Q350,23 500,11 Q650,1 780,14" stroke="rgba(26,15,10,0.9)" stroke-width="3.5" fill="none" stroke-linecap="round" filter="url(#bi1)"/></svg>
+      <div class="gems-grid">
+        <div class="gem-card gem-jade reveal reveal-delay-1">
+          <div class="gem-highlight"></div>
+          <svg class="gem-icon" viewBox="0 0 44 44" fill="none">
+            <path d="M22 3 L36 11 L36 33 L22 41 L8 33 L8 11 Z" stroke="rgba(30,90,75,0.7)" stroke-width="1.2" fill="rgba(60,160,130,0.25)"/>
+            <path d="M22 3 L36 11 L22 19 L8 11 Z" fill="rgba(100,200,175,0.35)"/>
+            <path d="M22 19 L36 11 L36 33 L22 41 Z" fill="rgba(30,100,80,0.2)"/>
+            <path d="M22 19 L8 11 L8 33 L22 41 Z" fill="rgba(70,170,145,0.15)"/>
+            <line x1="22" y1="3" x2="22" y2="41" stroke="rgba(150,230,210,0.4)" stroke-width="0.5"/>
+          </svg>
+          <div class="gem-name">碧玉 · Jade</div>
+          <div class="gem-title">Front-end Architecture</div>
+          <div class="gem-desc">Crafting polished React and TypeScript experiences with responsive motion.</div>
+          <span class="gem-badge">Modern</span>
+        </div>
+        <div class="gem-card gem-jade reveal reveal-delay-2">
+          <div class="gem-highlight"></div>
+          <svg class="gem-icon" viewBox="0 0 44 44" fill="none">
+            <path d="M22 3 L36 11 L36 33 L22 41 L8 33 L8 11 Z" stroke="rgba(30,90,75,0.7)" stroke-width="1.2" fill="rgba(60,160,130,0.25)"/>
+            <path d="M22 3 L36 11 L22 19 L8 11 Z" fill="rgba(100,200,175,0.35)"/>
+            <path d="M22 19 L36 11 L36 33 L22 41 Z" fill="rgba(30,100,80,0.2)"/>
+            <path d="M22 19 L8 11 L8 33 L22 41 Z" fill="rgba(70,170,145,0.15)"/>
+            <line x1="22" y1="3" x2="22" y2="41" stroke="rgba(150,230,210,0.4)" stroke-width="0.5"/>
+          </svg>
+          <div class="gem-name">碧玉 · Jade</div>
+          <div class="gem-title">Design Systems</div>
+          <div class="gem-desc">Building reusable patterns that feel intentional, accessible, and alive.</div>
+          <span class="gem-badge">Refined</span>
+        </div>
+        <div class="gem-card gem-gold reveal reveal-delay-1">
+          <div class="gem-highlight"></div>
+          <svg class="gem-icon" viewBox="0 0 44 44" fill="none">
+            <path d="M22 4 L27 16 L40 16 L30 24 L34 37 L22 29 L10 37 L14 24 L4 16 L17 16 Z" stroke="rgba(150,90,0,0.6)" stroke-width="1.2" fill="rgba(230,175,30,0.3)"/>
+            <path d="M22 4 L27 16 L17 16 Z" fill="rgba(255,240,120,0.5)"/>
+            <path d="M22 4 L17 16 L4 16 L14 24 Z" fill="rgba(200,145,10,0.2)"/>
+            <path d="M22 4 L27 16 L40 16 L30 24 Z" fill="rgba(250,220,80,0.3)"/>
+          </svg>
+          <div class="gem-name">黄金 · Gold</div>
+          <div class="gem-title">Animation & Motion</div>
+          <div class="gem-desc">Parallax, timing, and fluid transitions tuned for elegant scroll journeys.</div>
+          <span class="gem-badge">Dynamic</span>
+        </div>
+        <div class="gem-card gem-gold reveal reveal-delay-2">
+          <div class="gem-highlight"></div>
+          <svg class="gem-icon" viewBox="0 0 44 44" fill="none">
+            <path d="M22 4 L27 16 L40 16 L30 24 L34 37 L22 29 L10 37 L14 24 L4 16 L17 16 Z" stroke="rgba(150,90,0,0.6)" stroke-width="1.2" fill="rgba(230,175,30,0.3)"/>
+            <path d="M22 4 L27 16 L17 16 Z" fill="rgba(255,240,120,0.5)"/>
+            <path d="M22 4 L17 16 L4 16 L14 24 Z" fill="rgba(200,145,10,0.2)"/>
+            <path d="M22 4 L27 16 L40 16 L30 24 Z" fill="rgba(250,220,80,0.3)"/>
+          </svg>
+          <div class="gem-name">黄金 · Gold</div>
+          <div class="gem-title">Performance</div>
+          <div class="gem-desc">Minimal bundles, fast loading, and silky runtime behavior across devices.</div>
+          <span class="gem-badge">Fast</span>
+        </div>
+        <div class="gem-card gem-quartz reveal reveal-delay-3">
+          <div class="gem-highlight"></div>
+          <svg class="gem-icon" viewBox="0 0 44 44" fill="none">
+            <path d="M22 2 L30 10 L38 10 L38 34 L30 34 L22 42 L14 34 L6 34 L6 10 L14 10 Z" stroke="rgba(100,60,180,0.6)" stroke-width="1.2" fill="rgba(180,140,240,0.22)"/>
+            <path d="M22 2 L30 10 L22 18 L14 10 Z" fill="rgba(230,210,255,0.45)"/>
+            <path d="M22 18 L30 10 L38 10 L38 34 L30 34 L22 42 Z" fill="rgba(150,100,220,0.2)"/>
+            <path d="M22 18 L14 10 L6 10 L6 34 L14 34 L22 42 Z" fill="rgba(200,170,255,0.15)"/>
+            <circle cx="22" cy="22" r="4" stroke="rgba(140,90,210,0.5)" stroke-width="0.8" fill="rgba(230,215,255,0.4)"/>
+          </svg>
+          <div class="gem-name">水晶 · Quartz</div>
+          <div class="gem-title">Visual Storytelling</div>
+          <div class="gem-desc">Chinese textures, poetic spacing, and cinematic compositions for the web.</div>
+          <span class="gem-badge">Artful</span>
+        </div>
+        <div class="gem-card gem-silver reveal reveal-delay-4">
+          <div class="gem-highlight"></div>
+          <svg class="gem-icon" viewBox="0 0 44 44" fill="none">
+            <ellipse cx="22" cy="22" rx="16" ry="19" stroke="rgba(60,110,150,0.6)" stroke-width="1.2" fill="rgba(140,195,225,0.2)"/>
+            <ellipse cx="22" cy="22" rx="10" ry="13" stroke="rgba(60,110,150,0.3)" stroke-width="0.6" fill="none"/>
+            <path d="M10 16 Q22 11 34 16" stroke="rgba(100,170,210,0.6)" stroke-width="1" fill="none"/>
+            <path d="M7 22 Q22 17 37 22" stroke="rgba(80,150,195,0.4)" stroke-width="0.8" fill="none"/>
+            <path d="M10 28 Q22 33 34 28" stroke="rgba(60,120,165,0.35)" stroke-width="0.7" fill="none"/>
+          </svg>
+          <div class="gem-name">白银 · Silver</div>
+          <div class="gem-title">Collaboration</div>
+          <div class="gem-desc">Clear communication, product focus, and thoughtful teamwork at every stage.</div>
+          <span class="gem-badge">Trusted</span>
+        </div>
+      </div>
+    </div>
+    <div class="mist-overlay mist-bottom"></div>
+  </section>
+
+  <!-- ── CERTIFICATIONS ── -->
+  <section class="section" id="certifications">
+    <div class="mist-overlay mist-top"></div>
+    <!-- Decorative rock/mountain brush left side -->
+    <svg style="position:absolute;bottom:10%;left:0;width:150px;height:400px;opacity:0.06;pointer-events:none;" viewBox="0 0 150 400">
+      <path d="M20,400 L0,300 L30,320 L5,220 L40,250 L15,150 L55,190 L35,80 L70,130 L60,30 L85,90 L80,0 L95,60 L110,0 L115,70 L135,20 L130,110 L150,70 L140,180 L150,150 L135,260 L150,240 L130,350 L150,330 L140,400 Z" fill="#2d1f17"/>
+    </svg>
+    <div class="section-inner">
+      <div class="section-header reveal">
+        <div class="section-number">二</div>
+        <div class="section-title-block">
+          <div class="section-title-en">Certifications & Honours</div>
+          <div class="section-title-zh">证书之山峰</div>
+        </div>
+        <div class="section-line"></div>
+      </div>
+      <svg class="brush-divider" viewBox="0 0 800 28" xmlns="http://www.w3.org/2000/svg"><defs><filter id="bi2"><feGaussianBlur stdDeviation="1"/></filter></defs><path d="M10,18 Q80,6 180,15 Q300,24 450,9 Q600,0 790,13" stroke="rgba(26,15,10,0.85)" stroke-width="3" fill="none" stroke-linecap="round" filter="url(#bi2)"/></svg>
+      <div class="certs-list">
+        <div class="cert-row cert-row-jade reveal">
+          <div class="cert-gem-dot dot-jade"></div>
+          <div class="cert-info"><div class="cert-name">React & TypeScript</div><div class="cert-issuer">Front-end Academy · 前端学院</div></div>
+          <div class="cert-year">2025</div>
+        </div>
+        <div class="cert-row cert-row-gold reveal reveal-delay-1">
+          <div class="cert-gem-dot dot-gold"></div>
+          <div class="cert-info"><div class="cert-name">Web Animation</div><div class="cert-issuer">Motion Lab · 动态实验室</div></div>
+          <div class="cert-year">2024</div>
+        </div>
+        <div class="cert-row cert-row-quartz reveal reveal-delay-2">
+          <div class="cert-gem-dot dot-quartz"></div>
+          <div class="cert-info"><div class="cert-name">Performance Mastery</div><div class="cert-issuer">Google Web Collective</div></div>
+          <div class="cert-year">2024</div>
+        </div>
+        <div class="cert-row cert-row-silver reveal reveal-delay-3">
+          <div class="cert-gem-dot dot-silver"></div>
+          <div class="cert-info"><div class="cert-name">Design Systems</div><div class="cert-issuer">Noto Collective · 设计系统</div></div>
+          <div class="cert-year">2023</div>
+        </div>
+        <div class="cert-row cert-row-jade reveal reveal-delay-4">
+          <div class="cert-gem-dot dot-jade"></div>
+          <div class="cert-info"><div class="cert-name">Chinese Typography</div><div class="cert-issuer">Ink Atelier · 墨香</div></div>
+          <div class="cert-year">2025</div>
+        </div>
+      </div>
+    </div>
+    <div class="mist-overlay mist-bottom"></div>
+  </section>
+
+  <!-- ── ABOUT ── -->
+  <section class="section" id="about">
+    <div class="mist-overlay mist-top"></div>
+    <div class="section-inner">
+      <div class="section-header reveal">
+        <div class="section-number">三</div>
+        <div class="section-title-block">
+          <div class="section-title-en">Philosophy & Practice</div>
+          <div class="section-title-zh">道与行</div>
+        </div>
+        <div class="section-line"></div>
+      </div>
+      <div class="philosophy-wrap">
+        <div class="philosophy-char reveal">道</div>
+        <div class="philosophy-text">
+          <h3 class="reveal">About · 关于我</h3>
+          <p class="reveal reveal-delay-1">Phoenix blends modern web craftsmanship with ink-wash sensibility. Interfaces are built not only to function, but to feel calm, precise, and alive.</p>
+          <p class="reveal reveal-delay-2">Every project is treated like a scroll of paper: every layout, motion and interaction is composed with deliberate restraint and poetic balance.</p>
+          <p class="reveal reveal-delay-3">From architecture to animation, the goal is to create digital work that reads like a quiet narrative — a portfolio that feels both modern and timeless.</p>
+        </div>
+      </div>
+    </div>
+    <div class="mist-overlay mist-bottom"></div>
+  </section>
+
+  <!-- ── TESTIMONIALS ── -->
+  <section class="section" id="testimonials">
+    <div class="mist-overlay mist-top"></div>
+    <!-- Floating character decorations -->
+    <div style="position:absolute;top:15%;right:4%;font-family:'Noto Serif SC',serif;font-size:8rem;font-weight:700;color:rgba(26,15,10,0.04);pointer-events:none;letter-spacing:-0.05em;user-select:none;text-shadow:2px 4px 10px rgba(26,15,10,0.06);">信</div>
+    <div class="section-inner">
+      <div class="section-header reveal">
+        <div class="section-number">四</div>
+        <div class="section-title-block">
+          <div class="section-title-en">Testimonials</div>
+          <div class="section-title-zh">口碑之流水</div>
+        </div>
+        <div class="section-line"></div>
+      </div>
+      <svg class="brush-divider" viewBox="0 0 800 28" xmlns="http://www.w3.org/2000/svg"><defs><filter id="bi3"><feGaussianBlur stdDeviation="1.2"/></filter></defs><path d="M30,14 Q150,3 280,15 Q420,27 560,11 Q680,0 780,15" stroke="rgba(26,15,10,0.8)" stroke-width="2.8" fill="none" stroke-linecap="round" filter="url(#bi3)"/></svg>
+      <div class="testimonials-grid">
+        <div class="testimonial-card reveal reveal-delay-1">
+          <p class="testimonial-text">Phoenix translated a brief into an experience that felt both modern and rooted. Every scroll had weight, grace, and beautiful kinetic polish.</p>
+          <div class="testimonial-author">
+            <div class="author-seal">信</div>
+            <div><div class="author-name">Yun Li</div><div class="author-role">Product Lead · Pixel Studio</div></div>
+          </div>
+        </div>
+        <div class="testimonial-card reveal reveal-delay-2">
+          <p class="testimonial-text">The interface feels like a digital scroll: elegant, calm, and expressive. The motion and typography work together perfectly.</p>
+          <div class="testimonial-author">
+            <div class="author-seal">誉</div>
+            <div><div class="author-name">Mei Chen</div><div class="author-role">Creative Director · East Wave</div></div>
+          </div>
+        </div>
+        <div class="testimonial-card reveal reveal-delay-3">
+          <p class="testimonial-text">A rare blend of craftsmanship and technical clarity. The final delivery was polished, memorable, and beautifully restrained.</p>
+          <div class="testimonial-author">
+            <div class="author-seal">礼</div>
+            <div><div class="author-name">Jia Wen</div><div class="author-role">Founder · Silk Road Ventures</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mist-overlay mist-bottom"></div>
+  </section>
+
+  <!-- ── CONTACT ── -->
+  <section id="contact" class="contact-section">
+    <div class="contact-inner">
+      <div class="contact-title reveal">Contact · 联系我</div>
+      <div class="contact-sub reveal reveal-delay-1">Let us begin a conversation</div>
+      <div class="contact-links reveal reveal-delay-2">
+        <a href="mailto:hello@phoenix.dev" class="contact-link">Email</a>
+        <a href="#" class="contact-link">LinkedIn</a>
+        <a href="#" class="contact-link">GitHub</a>
+        <a href="#" class="contact-link">WeChat</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>凤皇 · 作品集 · </span><span id="footer-year"></span>
+    <span style="margin-left:1rem;font-size:0.6rem;letter-spacing:0.15em;opacity:0.6">笔墨之间，意在象外</span>
+  </footer>
+</div>
+
+<script>
+document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+/* ══════════════════════════════════════════════
+   BRUSH STROKE CURSOR — opaque black, streaky, fades as you move
+   ══════════════════════════════════════════════ */
+const canvas = document.getElementById('ink-canvas');
+const ctx = canvas.getContext('2d');
+const dpi = window.devicePixelRatio || 1;
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth * dpi;
+  canvas.height = window.innerHeight * dpi;
+  canvas.style.width = window.innerWidth + 'px';
+  canvas.style.height = window.innerHeight + 'px';
+  ctx.setTransform(dpi, 0, 0, dpi, 0, 0);
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+// Brush stroke state
+let lx = 0, ly = 0, lt = 0;
+let strokePoints = []; // ring buffer of recent points with timestamps
+let moving = false;
+let idleTimer = null;
+
+// Each point stored as {x, y, w, t} — x/y coords, width, timestamp
+const STROKE_LIFETIME = 1800; // ms before a stroke fully fades
+
+function drawBristleStroke(x, y, px, py, speed) {
+  const dx = x - px, dy = y - py;
+  const dist = Math.sqrt(dx*dx + dy*dy);
+  if (dist < 1) return;
+
+  const angle = Math.atan2(dy, dx);
+  // Width: wide at slow speed, thin at fast
+  const baseW = Math.max(3, Math.min(28, 28 - speed * 10));
+  const segments = Math.max(3, Math.ceil(dist / 3));
+
+  ctx.save();
+  ctx.globalCompositeOperation = 'source-over';
+
+  // Main stroke body — dark, opaque ink core
+  ctx.beginPath();
+  ctx.moveTo(px, py);
+  ctx.lineTo(x, y);
+  ctx.strokeStyle = 'rgba(20,10,5,0.82)';
+  ctx.lineWidth = baseW * 0.6;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+
+  // Bristle fibers — streaky, angled texture
+  const numBristles = Math.floor(baseW * 0.9);
+  for (let b = 0; b < numBristles; b++) {
+    const offset = (b / numBristles - 0.5) * baseW * 1.4;
+    const perpX = Math.cos(angle + Math.PI/2) * offset;
+    const perpY = Math.sin(angle + Math.PI/2) * offset;
+
+    // Bristle spreads more at edges
+    const edgeFactor = Math.abs(b / numBristles - 0.5) * 2;
+    const spread = edgeFactor * baseW * 0.25;
+    const spreadX = (Math.random() - 0.5) * spread;
+    const spreadY = (Math.random() - 0.5) * spread;
+
+    // Bristle opacity: dense center, sparse edges
+    const centerProx = 1 - edgeFactor;
+    const alpha = (0.55 + centerProx * 0.35) * (0.7 + Math.random() * 0.3);
+
+    ctx.beginPath();
+    ctx.moveTo(px + perpX + spreadX, py + perpY + spreadY);
+    ctx.lineTo(x + perpX + spreadX * 0.6, y + perpY + spreadY * 0.6);
+    ctx.strokeStyle = `rgba(15,8,3,${alpha})`;
+    ctx.lineWidth = 0.4 + Math.random() * 0.8;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+  }
+
+  // Ink splatter/bleed at stroke edges
+  for (let s = 0; s < 3; s++) {
+    const t = Math.random();
+    const sx = px + dx * t + (Math.random() - 0.5) * baseW * 0.8;
+    const sy = py + dy * t + (Math.random() - 0.5) * baseW * 0.8;
+    ctx.beginPath();
+    ctx.arc(sx, sy, Math.random() * baseW * 0.18, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(15,8,3,${0.08 + Math.random() * 0.12})`;
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+// Fade loop: clear entire canvas using destination-out at varying speeds
+// Faster when not moving (idle fade), slower while painting
+let lastMoveTime = 0;
+
+function fadeLoop() {
+  const now = performance.now();
+  const timeSinceMove = now - lastMoveTime;
+
+  ctx.save();
+  ctx.globalCompositeOperation = 'destination-out';
+  // Fast fade when idle, very slow when actively painting
+  const fadeAlpha = timeSinceMove > 300 ? 0.038 : 0.012;
+  ctx.fillStyle = `rgba(0,0,0,${fadeAlpha})`;
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.restore();
+
+  requestAnimationFrame(fadeLoop);
+}
+requestAnimationFrame(fadeLoop);
+
+document.addEventListener('mousemove', e => {
+  const x = e.clientX, y = e.clientY;
+  const now = performance.now();
+  const dt = Math.max(now - lt, 8);
+  const dx = x - lx, dy = y - ly;
+  const dist = Math.sqrt(dx*dx + dy*dy);
+  const speed = dist / dt; // px/ms
+
+  if (lt > 0 && dist > 0.5) {
+    drawBristleStroke(x, y, lx, ly, speed);
+  }
+
+  lx = x; ly = y; lt = now;
+  lastMoveTime = now;
+});
+
+/* ══════════════════════════════════════════════
+   PARALLAX BG STAGE SWITCHING
+   ══════════════════════════════════════════════ */
+const stages = document.querySelectorAll('.bg-stage');
+const stageMap = { hero: 0, skills: 1, certifications: 2, about: 2, testimonials: 3, contact: 4 };
+let currentStage = 0;
+
+function setStage(n) {
+  if (n === currentStage) return;
+  currentStage = n;
+  stages.forEach((s, i) => s.classList.toggle('active', i === n));
+}
+
+function onScroll() {
+  const winH = window.innerHeight;
+  const sections = ['hero','skills','certifications','about','testimonials','contact'];
+  let active = 'hero';
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    if (rect.top < winH * 0.55 && rect.bottom > 0) active = id;
+  });
+  setStage(stageMap[active] || 0);
+
+  // Parallax hero mountains
+  const mountains = document.querySelector('.hero-mountains');
+  if (mountains) mountains.style.transform = `translateY(${window.scrollY * 0.22}px)`;
+
+  // Reveal elements
+  document.querySelectorAll('.reveal:not(.visible)').forEach(el => {
+    if (el.getBoundingClientRect().top < winH * 0.88) el.classList.add('visible');
+  });
+
+  // Lanterns visible on hero
+  const heroRect = document.getElementById('hero').getBoundingClientRect();
+  const lanterns = document.getElementById('deco-lanterns');
+  lanterns.style.opacity = heroRect.bottom > 0 && heroRect.top < winH ? '1' : '0';
+}
+window.addEventListener('scroll', onScroll, { passive: true });
+onScroll();
+
+/* ── HERO MOUSE PARALLAX ── */
+document.addEventListener('mousemove', e => {
+  const x = (e.clientX / window.innerWidth - 0.5) * 12;
+  const y = (e.clientY / window.innerHeight - 0.5) * 7;
+  const title = document.getElementById('hero-title');
+  if (title) title.style.transform = `translate(${x * 0.4}px, ${y * 0.4}px)`;
+});
+
+/* ══════════════════════════════════════════════
+   FALLING LEAVES
+   ══════════════════════════════════════════════ */
+const leavesLayer = document.getElementById('leaves-layer');
+const leafPaths = [
+  // ginkgo leaf shape
+  `<svg viewBox="0 0 24 28" width="18" height="21"><path d="M12,2 Q18,6 20,12 Q22,18 16,22 Q12,24 12,24 Q12,24 8,22 Q2,18 4,12 Q6,6 12,2Z" fill="currentColor"/><line x1="12" y1="2" x2="12" y2="28" stroke="currentColor" stroke-width="0.8" opacity="0.5"/></svg>`,
+  // maple leaf
+  `<svg viewBox="0 0 28 28" width="16" height="16"><path d="M14,0 L16,8 L20,6 L17,12 L22,11 L18,16 L22,20 L17,19 L18,24 L14,22 L10,24 L11,19 L6,20 L10,16 L6,11 L11,12 L8,6 L12,8 Z" fill="currentColor"/></svg>`,
+  // simple round leaf
+  `<svg viewBox="0 0 20 24" width="14" height="18"><path d="M10,1 Q17,3 18,10 Q19,17 12,22 Q10,23 10,23 Q10,23 8,22 Q1,17 2,10 Q3,3 10,1Z" fill="currentColor"/><line x1="10" y1="1" x2="10" y2="23" stroke="currentColor" stroke-width="0.7" opacity="0.6"/></svg>`,
+];
+const leafColors = [
+  'rgba(140,80,30,0.55)', 'rgba(180,100,20,0.5)', 'rgba(200,140,40,0.5)',
+  'rgba(100,140,60,0.45)', 'rgba(160,60,30,0.55)', 'rgba(120,90,40,0.5)'
+];
+
+function createLeaf() {
+  const el = document.createElement('div');
+  el.className = 'leaf';
+  el.style.left = (5 + Math.random() * 90) + '%';
+  el.style.top = '-60px';
+  el.style.color = leafColors[Math.floor(Math.random() * leafColors.length)];
+  el.style.animationDuration = (8 + Math.random() * 12) + 's';
+  el.style.animationDelay = (Math.random() * 8) + 's';
+  el.innerHTML = leafPaths[Math.floor(Math.random() * leafPaths.length)];
+  leavesLayer.appendChild(el);
+  setTimeout(() => el.remove(), 22000);
+}
+
+// Spawn leaves periodically
+setInterval(createLeaf, 1800);
+// Initial burst
+for (let i = 0; i < 6; i++) setTimeout(createLeaf, i * 400);
+
+/* ══════════════════════════════════════════════
+   BIRDS
+   ══════════════════════════════════════════════ */
+const birdsLayer = document.getElementById('birds-layer');
+
+function createFlock() {
+  const el = document.createElement('div');
+  el.className = 'bird-flock';
+  el.style.top = (8 + Math.random() * 35) + '%';
+  el.style.animationDuration = (18 + Math.random() * 14) + 's';
+  el.style.animationDelay = (Math.random() * 10) + 's';
+  const birdCount = 3 + Math.floor(Math.random() * 4);
+  let svgContent = `<svg viewBox="0 0 ${birdCount * 22} 20" width="${birdCount * 22}" height="20" fill="none">`;
+  for (let b = 0; b < birdCount; b++) {
+    const bx = b * 22 + 5 + (Math.random() - 0.5) * 8;
+    const by = 8 + (Math.random() - 0.5) * 6;
+    svgContent += `<path d="M${bx},${by} Q${bx+5},${by-4} ${bx+10},${by} Q${bx+5},${by+1} ${bx},${by}Z" fill="rgba(26,15,10,0.8)"/>`;
+  }
+  svgContent += '</svg>';
+  el.innerHTML = svgContent;
+  birdsLayer.appendChild(el);
+  setTimeout(() => el.remove(), 35000);
+}
+
+setInterval(createFlock, 6000);
+createFlock();
+
+/* gem card stagger delays */
+document.querySelectorAll('.gems-grid .gem-card').forEach((c, i) => {
+  c.style.transitionDelay = (i * 0.07) + 's';
+});
+</script>
+</body>
+</html>
