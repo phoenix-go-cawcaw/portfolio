@@ -1,3 +1,3 @@
-# Welcome to Phoenix's Portfolio
+# Welcome to your Lovable project
 
 TODO: Document your project here
