@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const Hero = () => {
   const mountainsRef = useRef<SVGSVGElement>(null);
@@ -126,9 +126,7 @@ const Hero = () => {
           Portfolio · 作品集
         </p>
 
-        <h1 className="font-en text-7xl md:text-[8.5rem] font-light tracking-[0.08em] leading-none text-ink ink-shadow">
-          PHOENIX
-        </h1>
+        <PhoenixTitle />
 
         <div className="mx-auto my-6 h-px w-20 bg-ink/30" />
 
@@ -177,3 +175,52 @@ const Hero = () => {
 };
 
 export default Hero;
+
+/* ---------------- Phoenix igniting title ---------------- */
+const PhoenixTitle = () => {
+  const [igniting, setIgniting] = useState(false);
+  const [embers, setEmbers] = useState<{ id: number; x: number; dx: number; dy: number; dur: number }[]>([]);
+
+  const ignite = () => {
+    if (igniting) return;
+    setIgniting(true);
+    const next = Array.from({ length: 22 }, (_, i) => ({
+      id: Date.now() + i,
+      x: Math.random() * 100, // % across title
+      dx: (Math.random() - 0.5) * 80,
+      dy: -(80 + Math.random() * 120),
+      dur: 1100 + Math.random() * 700,
+    }));
+    setEmbers(next);
+    window.setTimeout(() => {
+      setIgniting(false);
+      setEmbers([]);
+    }, 1500);
+  };
+
+  return (
+    <h1
+      onClick={ignite}
+      className={`phoenix-title font-en text-7xl md:text-[8.5rem] font-light tracking-[0.08em] leading-none text-ink ink-shadow ${
+        igniting ? "igniting" : ""
+      }`}
+    >
+      PHOENIX
+      {embers.map((e) => (
+        <span
+          key={e.id}
+          className="ember igniting"
+          style={
+            {
+              left: `${e.x}%`,
+              bottom: "10%",
+              "--ember-x": `${e.dx}px`,
+              "--ember-y": `${e.dy}px`,
+              "--ember-dur": `${e.dur}ms`,
+            } as React.CSSProperties
+          }
+        />
+      ))}
+    </h1>
+  );
+};

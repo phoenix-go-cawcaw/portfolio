@@ -21,27 +21,17 @@ const projects: Project[] = [
     titleZh: "锦匣雅趣",
     heading: "E-commerce Vue Showcase",
     description:
-      "A compact e-commerce experience built in Vue, styled as a paper scroll and presented with refined motion.",
+      "A compact e-commerce experience built in Vue, and presented with refined animation.",
     category: "E-commerce",
     link: "https://github.com/phoenix-go-cawcaw/Hobby-in-a-Box",
     stack: ["Vue", "JavaScript", "Component Design", "Animation"],
-  },
-  {
-    name: "First Module Project",
-    titleZh: "人事初卷",
-    heading: "HR System Vue Module",
-    description:
-      "A Vue-driven HR module, part of a larger browser-based HR suite with layered component design.",
-    category: "Vue · HR",
-    link: "https://github.com/phoenix-go-cawcaw/first-module-project",
-    stack: ["Vue", "HR Workflows", "Reusable UI", "Forms"],
   },
   {
     name: "Full Stack Project",
     titleZh: "全栈人和",
     heading: "HR Full Stack Vue",
     description:
-      "A full-stack Vue HR system that includes Hobby in a Box functionality as a Vue-based retail workflow.",
+      "A full-stack Vue HR system that builds an HR-simulation system as a Vue-based retail workflow.",
     category: "Vue · Full Stack",
     link: "https://github.com/phoenix-go-cawcaw/Full-Stack-Project",
     stack: ["Vue", "Full Stack", "Retail Flow", "System Design"],

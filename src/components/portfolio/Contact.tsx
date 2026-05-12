@@ -4,7 +4,7 @@ import BrushDivider from "./BrushDivider";
 const links = [
   { label: "Email", href: "https://mail.google.com/mail/?view=cm&fs=1&to=jojoeydenver@gmail.com" },
   { label: "GitHub", href: "https://github.com/phoenix-go-cawcaw" },
-  { label: "LinkedIn", href: "#" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/in/phoenix-c-75251a3b1" },
 ];
 
 const Contact = () => (
