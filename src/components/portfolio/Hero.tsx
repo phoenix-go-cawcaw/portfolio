@@ -117,9 +117,9 @@ const Hero = () => {
       <div className="hidden md:flex absolute left-10 top-1/2 -translate-y-1/2 flex-col gap-4 font-zh text-base font-light text-ink-muted">
         <span>笔</span><span>墨</span><span>之</span><span>间</span>
       </div>
-      <div className="hidden md:flex absolute right-10 top-1/2 -translate-y-1/2 flex-col gap-4 font-zh text-base font-light text-ink-muted">
+      {/* <div className="hidden md:flex absolute right-10 top-1/2 -translate-y-1/2 flex-col gap-4 font-zh text-base font-light text-ink-muted">
         <span>意</span><span>在</span><span>象</span><span>外</span>
-      </div>
+      </div> */}
 
       <div ref={contentRef} className="relative z-10 text-center px-6 animate-fade-up will-change-transform">
         <p className="font-zh-sans text-[0.7rem] tracking-[0.55em] uppercase text-ink-muted mb-6">
@@ -149,14 +149,11 @@ const Hero = () => {
             View Works
           </a>
           <a
-            href="#contact"
-            onClick={(e) => {
-              e.preventDefault();
-              document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
-            }}
-            className="font-zh-sans text-xs tracking-[0.3em] uppercase text-ink-soft hover:text-seal transition-colors"
+            href="/cv.pdf"
+            download
+            className="font-zh-sans text-xs tracking-[0.3em] uppercase border border-seal text-seal px-6 py-3 hover:bg-seal hover:text-seal-foreground transition-colors"
           >
-            Contact →
+            Download CV
           </a>
         </div>
       </div>
