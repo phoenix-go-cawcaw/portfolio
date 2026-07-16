@@ -37,15 +37,25 @@ const projects: Project[] = [
     stack: ["Vue", "Full Stack", "Retail Flow", "System Design"],
   },
   {
-    name: "Oracle APEX Simulation",
-    titleZh: "智析衡卷",
-    heading: "Data Analyst HR Demo",
+    name: "Service Finder",
+    titleZh: "服务寻迹",
+    heading: "Service Discovery Web App",
     description:
-      "An HR data analyst simulation built with Oracle APEX, focused on reporting, dashboards, and workflow insights.",
-    category: "Data Analytics",
-    link: "https://oracleapex.com/ords/r/otdb/ot-company/login?session=11468584978410",
-    stack: ["Oracle APEX", "Dashboards", "Reporting", "Analytics"],
+      "A Firebase-hosted service discovery platform that connects users with local providers through an intuitive search and listing experience.",
+    category: "Web App",
+    link: "https://service-finder67.web.app",
+    stack: ["Firebase", "Web App", "Service Discovery", "Hosting"],
   },
+  // {
+  //   name: "Oracle APEX Simulation",
+  //   titleZh: "智析衡卷",
+  //   heading: "Data Analyst HR Demo",
+  //   description:
+  //     "An HR data analyst simulation built with Oracle APEX, focused on reporting, dashboards, and workflow insights.",
+  //   category: "Data Analytics",
+  //   link: "https://oracleapex.com/ords/r/otdb/ot-company/login?session=11468584978410",
+  //   stack: ["Oracle APEX", "Dashboards", "Reporting", "Analytics"],
+  // },
 ];
 
 const Projects = () => {
