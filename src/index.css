@@ -83,7 +83,26 @@
 @layer base {
   * { @apply border-border; }
 
-  html { scroll-behavior: smooth; }
+  /* Native smooth-scroll only as a fallback — once Lenis mounts it tags
+     <html> with .lenis and takes over scrolling itself. Leaving both
+     active fights over the same scrollTop and causes jumpy, overshooting
+     scroll (Lenis animates scrollTop, native smooth-scroll then tries to
+     re-animate to that same intermediate value, compounding on every
+     wheel tick). */
+  html:not(.lenis) { scroll-behavior: smooth; }
+
+  html.lenis {
+    scroll-behavior: auto !important;
+  }
+  html.lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+  html.lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+  }
+  html.lenis.lenis-stopped {
+    overflow: hidden;
+  }
 
   body {
     @apply bg-background text-foreground antialiased;
@@ -290,6 +309,49 @@
     transform: translate(var(--ember-x, 0), var(--ember-y, -120px)) scale(0.2);
   }
 }
+
+/* ---------- Cranes: wing flap + flight drift ---------- */
+.crane-wing {
+  transform-origin: 0 0;
+  animation: crane-flap var(--flap-duration, 0.9s) var(--flap-delay, 0s) ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes crane-flap {
+  0%   { transform: rotate(-8deg); }
+  45%  { transform: rotate(55deg); }
+  60%  { transform: rotate(55deg); }
+  100% { transform: rotate(-8deg); }
+}
+
+.crane-flight {
+  position: absolute;
+  left: 0;
+  will-change: transform;
+  animation-name: crane-fly-mid;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+/* Three gentle arcs so birds don't all travel on the same line */
+@keyframes crane-fly-low {
+  0%   { transform: translate3d(-15vw, 0, 0); }
+  50%  { transform: translate3d(55vw, 18px, 0); }
+  100% { transform: translate3d(120vw, -6px, 0); }
+}
+@keyframes crane-fly-mid {
+  0%   { transform: translate3d(-15vw, 0, 0); }
+  50%  { transform: translate3d(55vw, -22px, 0); }
+  100% { transform: translate3d(120vw, 10px, 0); }
+}
+@keyframes crane-fly-high {
+  0%   { transform: translate3d(-15vw, 0, 0); }
+  50%  { transform: translate3d(55vw, 14px, 0); }
+  100% { transform: translate3d(120vw, -14px, 0); }
+}
+.crane-flight--low  { animation-name: crane-fly-low; }
+.crane-flight--mid  { animation-name: crane-fly-mid; }
+.crane-flight--high { animation-name: crane-fly-high; }
 
 @layer utilities {
   .ink-shadow {

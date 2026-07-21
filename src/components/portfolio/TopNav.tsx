@@ -3,13 +3,14 @@ import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/s
 import { DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Menu } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { scrollToId } from "../../lib/lenisController";
 
 const items = [
   { id: "hero", en: "Home", zh: "首" },
+  { id: "about", en: "About", zh: "我" },
   { id: "skills", en: "Skills", zh: "艺" },
   { id: "projects", en: "Works", zh: "作" },
   { id: "certifications", en: "Honours", zh: "证" },
-  { id: "about", en: "About", zh: "我" },
   { id: "contact", en: "Contact", zh: "联" },
 ];
 
@@ -34,7 +35,9 @@ const items = [
   }, []);
 
   const go = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    // -64 offsets for the fixed top-nav height so sections don't land
+    // tucked underneath it.
+    scrollToId(id, id === "hero" ? 0 : -64);
   };
 
   return (

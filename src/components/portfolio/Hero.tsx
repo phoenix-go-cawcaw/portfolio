@@ -1,10 +1,38 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import Cranes from "./Cranes";
+import { scrollToId } from "../../lib/lenisController";
+import { ridgePath } from "../../lib/ridgePath";
+
+// Per-layer scroll speed and mouse-parallax strength, farthest → closest
+const LAYER_SCROLL_SPEED = [0.04, 0.07, 0.11, 0.16, 0.22, 0.3];
+const LAYER_MOUSE_STRENGTH = [2, 4, 7, 11, 16, 22];
+
+// Ridge points per layer (x, y) — farthest (subtle, high) to closest
+// (bold, low). Fed through ridgePath() for smooth ink-brush curves
+// instead of a geometric zigzag.
+const LAYER_POINTS: [number, number][][] = [
+  [[0, 245], [160, 215], [320, 235], [480, 205], [640, 230], [800, 210], [960, 238], [1120, 218], [1280, 240], [1440, 225]],
+  [[0, 280], [160, 250], [320, 270], [480, 240], [640, 265], [800, 245], [960, 272], [1120, 252], [1280, 275], [1440, 258]],
+  [[0, 315], [160, 282], [320, 308], [480, 278], [640, 305], [800, 280], [960, 310], [1120, 285], [1280, 312], [1440, 290]],
+  [[0, 350], [160, 308], [320, 340], [480, 300], [640, 335], [800, 302], [960, 342], [1120, 310], [1280, 345], [1440, 315]],
+  [[0, 388], [160, 332], [320, 375], [480, 325], [640, 368], [800, 328], [960, 378], [1120, 335], [1280, 382], [1440, 340]],
+  [[0, 430], [160, 352], [320, 410], [480, 345], [640, 400], [800, 350], [960, 415], [1120, 358], [1280, 420], [1440, 365]],
+];
+const LAYER_TOP_OPACITY = [0.1, 0.14, 0.18, 0.22, 0.28, 0.34];
+const LAYER_BOTTOM_OPACITY = [0.02, 0.03, 0.04, 0.05, 0.06, 0.08];
 
 const Hero = () => {
-  const mountainsRef = useRef<SVGSVGElement>(null);
+  const layerRefs = useRef<(SVGPathElement | null)[]>([]);
   const mistRef = useRef<SVGSVGElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const sealRef = useRef<HTMLDivElement>(null);
+  const mouseXRef = useRef(0);
+
+  // Smooth ink-brush ridgelines, computed once.
+  const layerPaths = useMemo(
+    () => LAYER_POINTS.map((points) => ridgePath(points, 460)),
+    []
+  );
 
   useEffect(() => {
     let raf = 0;
@@ -13,6 +41,11 @@ const Hero = () => {
 
     const onScroll = () => {
       target = window.scrollY;
+    };
+
+    const onMouseMove = (e: MouseEvent) => {
+      // Normalize to roughly -1..1 across the viewport width
+      mouseXRef.current = (e.clientX / window.innerWidth - 0.5) * 2;
     };
 
     const start = performance.now();
@@ -27,9 +60,15 @@ const Hero = () => {
       const driftX = Math.sin(elapsed * 0.12) * 4;       // gentle lateral sway
       const sealDrift = Math.sin(elapsed * 0.22) * 1.4;  // tiny seal breath
 
-      if (mountainsRef.current) {
-        mountainsRef.current.style.transform = `translate3d(${driftX}px, ${current * 0.25 + driftY}px, 0)`;
-      }
+      // Six mountain layers, each with its own scroll speed and mouse
+      // parallax strength — closer layers (higher index) move more.
+      layerRefs.current.forEach((layer, i) => {
+        if (!layer) return;
+        const ty = current * LAYER_SCROLL_SPEED[i] + driftY * (0.4 + i * 0.12);
+        const tx = driftX * (0.5 + i * 0.1) + mouseXRef.current * LAYER_MOUSE_STRENGTH[i];
+        layer.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
+      });
+
       if (contentRef.current) {
         const t = Math.min(current / 600, 1);
         contentRef.current.style.transform = `translate3d(0, ${current * 0.15}px, 0)`;
@@ -48,9 +87,11 @@ const Hero = () => {
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("mousemove", onMouseMove, { passive: true });
     raf = requestAnimationFrame(tick);
     return () => {
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("mousemove", onMouseMove);
       cancelAnimationFrame(raf);
     };
   }, []);
@@ -60,11 +101,10 @@ const Hero = () => {
       id="hero"
       className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16"
     >
-      {/* Soft mountain silhouette with parallax */}
+      {/* Six-layer mountain parallax — farthest (subtlest, top) to closest (boldest, bottom) */}
       <svg
-        ref={mountainsRef}
-        className="absolute bottom-0 left-0 right-0 w-full h-1/2 pointer-events-none opacity-70 will-change-transform"
-        viewBox="0 0 1440 400"
+        className="absolute bottom-0 left-0 right-0 w-full h-[58%] pointer-events-none opacity-80"
+        viewBox="0 0 1440 460"
         preserveAspectRatio="xMidYMax slice"
         xmlns="http://www.w3.org/2000/svg"
         aria-hidden="true"
@@ -74,19 +114,32 @@ const Hero = () => {
             <stop offset="0%" stopColor="hsl(var(--background))" stopOpacity="0.7" />
             <stop offset="100%" stopColor="hsl(var(--background))" stopOpacity="0" />
           </linearGradient>
-          <filter id="soft1"><feGaussianBlur stdDeviation="2" /></filter>
+          <filter id="soft1"><feGaussianBlur stdDeviation="2.5" /></filter>
+          <filter id="soft2"><feGaussianBlur stdDeviation="1.2" /></filter>
+          {layerPaths.map((_, i) => (
+            <linearGradient key={i} id={`mtn-grad-${i}`} x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stopColor="hsl(var(--ink))" stopOpacity={LAYER_TOP_OPACITY[i]} />
+              <stop offset="100%" stopColor="hsl(var(--ink))" stopOpacity={LAYER_BOTTOM_OPACITY[i]} />
+            </linearGradient>
+          ))}
         </defs>
-        <path
-          d="M0,300 L120,230 L220,260 L340,200 L460,240 L580,200 L700,250 L820,210 L940,250 L1060,220 L1180,250 L1300,225 L1440,240 L1440,400 L0,400 Z"
-          fill="hsl(var(--ink) / 0.10)"
-          filter="url(#soft1)"
-        />
-        <path
-          d="M0,340 L140,290 L260,310 L380,275 L500,300 L620,280 L740,305 L860,285 L980,308 L1100,290 L1220,310 L1340,295 L1440,305 L1440,400 L0,400 Z"
-          fill="hsl(var(--ink) / 0.16)"
-        />
-        <rect width="1440" height="120" y="280" fill="url(#mistfade)" />
+
+        {layerPaths.map((d, i) => (
+          <path
+            key={i}
+            ref={(el) => (layerRefs.current[i] = el)}
+            className="will-change-transform"
+            d={d}
+            fill={`url(#mtn-grad-${i})`}
+            filter={i === 0 ? "url(#soft1)" : i === 1 ? "url(#soft2)" : undefined}
+          />
+        ))}
+
+        <rect width="1440" height="120" y="330" fill="url(#mistfade)" />
       </svg>
+
+      {/* Cranes gliding across the upper sky — vector-rigged, no image assets */}
+      <Cranes />
 
       {/* Drifting mist layer — slower & independent of mountain parallax */}
       <svg
@@ -142,7 +195,7 @@ const Hero = () => {
             href="#projects"
             onClick={(e) => {
               e.preventDefault();
-              document.getElementById("projects")?.scrollIntoView({ behavior: "smooth" });
+              scrollToId("projects", -64);
             }}
             className="font-zh-sans text-xs tracking-[0.3em] uppercase border border-ink/40 px-6 py-3 hover:bg-ink hover:text-primary-foreground transition-colors"
           >
