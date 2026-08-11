@@ -3,7 +3,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/s
 import { DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Menu } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { scrollToId } from "../../lib/lenisController";
+import { jumpToStop } from "../../lib/lenisController";
 
 const items = [
   { id: "hero", en: "Home", zh: "首" },
@@ -35,9 +35,7 @@ const items = [
   }, []);
 
   const go = (id: string) => {
-    // -64 offsets for the fixed top-nav height so sections don't land
-    // tucked underneath it.
-    scrollToId(id, id === "hero" ? 0 : -64);
+    jumpToStop(id);
   };
 
   return (

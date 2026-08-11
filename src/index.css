@@ -78,10 +78,86 @@
     --sidebar-border: 30 18% 78%;
     --sidebar-ring: 22 30% 12%;
   }
+
+  /* ============================================================
+     Night mode — toggled via the sun/moon in the hero. Same token
+     names as :root, so every component that already reads
+     hsl(var(--ink)) / hsl(var(--background)) etc. re-themes for free.
+     ============================================================ */
+  .dark {
+    --background: 222 35% 8%;         /* deep night sky */
+    --foreground: 40 22% 92%;         /* pale moonlit ink */
+
+    --paper: 222 28% 11%;
+    --paper-aged: 222 24% 15%;
+    --paper-deep: 222 20% 20%;
+
+    --card: 222 30% 10%;
+    --card-foreground: 40 22% 92%;
+
+    --popover: 222 30% 10%;
+    --popover-foreground: 40 22% 92%;
+
+    --ink: 40 22% 92%;
+    --ink-soft: 40 16% 76%;
+    --ink-muted: 40 10% 58%;
+
+    --primary: 40 22% 92%;
+    --primary-foreground: 222 35% 9%;
+
+    --secondary: 222 22% 17%;
+    --secondary-foreground: 40 18% 86%;
+
+    --muted: 222 20% 15%;
+    --muted-foreground: 40 10% 60%;
+
+    --accent: 222 22% 19%;
+    --accent-foreground: 40 22% 92%;
+
+    /* Cinnabar seal, brightened so it still reads against a dark ground */
+    --seal: 6 74% 58%;
+    --seal-foreground: 40 22% 96%;
+    --seal-deep: 6 65% 42%;
+
+    --jade: 158 38% 54%;
+    --gold: 42 78% 64%;
+    --indigo: 215 48% 66%;
+
+    --destructive: 6 74% 58%;
+    --destructive-foreground: 40 22% 96%;
+
+    --border: 222 20% 21%;
+    --input: 222 20% 21%;
+    --ring: 40 22% 92%;
+
+    --gradient-paper: linear-gradient(180deg, hsl(222 30% 10%) 0%, hsl(222 24% 15%) 100%);
+    --gradient-mist: linear-gradient(180deg, hsl(222 35% 8% / 0) 0%, hsl(222 35% 8% / 0.9) 100%);
+    --shadow-paper: 0 1px 2px hsl(0 0% 0% / 0.35), 0 8px 24px hsl(0 0% 0% / 0.45);
+    --shadow-seal: 0 6px 18px hsl(6 74% 58% / 0.3);
+
+    --sidebar-background: 222 30% 10%;
+    --sidebar-foreground: 40 18% 86%;
+    --sidebar-primary: 40 22% 92%;
+    --sidebar-primary-foreground: 222 35% 9%;
+    --sidebar-accent: 222 22% 17%;
+    --sidebar-accent-foreground: 40 22% 92%;
+    --sidebar-border: 222 20% 21%;
+    --sidebar-ring: 40 22% 92%;
+  }
 }
 
 @layer base {
   * { @apply border-border; }
+
+  /* Smooth cross-fade when the sun/moon toggles day/night, instead of
+     every color snapping instantly. Deliberately not a blanket `*`
+     selector — that would fight the transform-based animations already
+     running on cranes/fireflies/dragon. */
+  body, .paper-card, .top-nav, section, header, footer, button, a,
+  svg, path, ellipse, circle, .cloud-panel {
+    transition: background-color 700ms ease, border-color 700ms ease,
+      color 700ms ease, fill 700ms ease, stroke 700ms ease, box-shadow 700ms ease;
+  }
 
   /* Native smooth-scroll only as a fallback — once Lenis mounts it tags
      <html> with .lenis and takes over scrolling itself. Leaving both
@@ -110,15 +186,31 @@
     font-feature-settings: "liga", "kern";
   }
 
-  /* Subtle paper grain — fixed, no perf cost */
-  body::before {
+  /* Subtle paper grain — pure CSS repeating gradient, zero paint cost
+     after initial load (no SVG filter, no mix-blend-mode compositing).
+     The browser treats this as a simple raster texture, not a repaint
+     boundary, so scrolling never triggers a re-render. */
+  body::after {
     content: '';
     position: fixed;
     inset: 0;
     pointer-events: none;
     z-index: 1;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
-    mix-blend-mode: multiply;
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        hsla(var(--ink) / 0.012) 2px,
+        hsla(var(--ink) / 0.012) 3px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 2px,
+        hsla(var(--ink) / 0.012) 2px,
+        hsla(var(--ink) / 0.012) 3px
+      );
   }
 
   ::selection { background: hsl(var(--seal) / 0.25); color: hsl(var(--ink)); }
@@ -137,6 +229,13 @@
 
   .section-pad {
     @apply py-24 md:py-32;
+  }
+
+  /* Viewport-filling section for snap-scroll — each one becomes a
+     distinct "painting" panel. Tighter padding on mobile (py-10 vs
+     py-16) so cards don't overflow the viewport on small screens. */
+  .section-snap {
+    @apply min-h-screen flex flex-col justify-center py-10 md:py-24;
   }
 
   /* ---------- Section header (number / titles / line) ---------- */
@@ -331,6 +430,13 @@
   animation-name: crane-fly-mid;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
+  /* Without this, the browser doesn't apply the 0% keyframe (off-screen)
+     during animation-delay — the crane just sits at its untransformed
+     default position, fully visible and motionless, until the delay
+     ends and it snaps off-screen to actually start. "backwards" applies
+     the 0% state immediately, so delayed cranes are off-screen from
+     the very first frame. */
+  animation-fill-mode: backwards;
 }
 
 /* Three gentle arcs so birds don't all travel on the same line */
@@ -352,6 +458,293 @@
 .crane-flight--low  { animation-name: crane-fly-low; }
 .crane-flight--mid  { animation-name: crane-fly-mid; }
 .crane-flight--high { animation-name: crane-fly-high; }
+
+/* ---------- Temple3D (Certifications) ---------- */
+.temple-perspective {
+  perspective: 1400px;
+  perspective-origin: 50% 42%;
+}
+.temple-group {
+  position: relative;
+  width: 1px;
+  height: 1px;
+  margin: 0 auto;
+  transform-style: preserve-3d;
+}
+.temple-wall {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-top: calc(-1 * var(--wall-h, 250px) / 2);
+  margin-left: calc(-1 * var(--wall-w, 210px) / 2);
+  background: radial-gradient(circle at 30% 20%, hsl(var(--paper-aged) / 0.98), hsl(var(--paper) / 0.98) 35%, hsl(var(--paper-deep) / 0.95) 100%);
+  border: 1px solid hsl(var(--ink) / 0.18);
+  backface-visibility: hidden;
+  transition: opacity 0.5s ease, filter 0.5s ease;
+  box-shadow: inset 0 0 24px hsl(0 0% 0% / 0.12), 0 12px 42px hsl(var(--ink) / 0.08);
+  overflow: hidden;
+}
+.temple-wall::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 15%, hsla(35, 20%, 80%, 0.2) 0 6px, transparent 8px),
+    radial-gradient(circle at 78% 25%, hsla(30, 14%, 90%, 0.18) 0 4px, transparent 6px),
+    linear-gradient(180deg, transparent 0%, hsla(0, 0%, 100%, 0.14) 8%, transparent 9%, transparent 92%, hsla(0, 0%, 100%, 0.12) 100%);
+  pointer-events: none;
+}
+.temple-wall-surface {
+  position: absolute;
+  inset: 10% 6% 18% 6%;
+  border: 1px solid transparent;
+  background: linear-gradient(180deg, transparent 0%, hsla(var(--ink), 0.04) 15%, transparent 18%, transparent 82%, hsla(var(--ink), 0.04) 92%, transparent 100%);
+  box-shadow: inset 0 0 18px hsla(var(--ink), 0.08);
+  filter: saturate(0.9);
+}
+.temple-wall-carving {
+  position: absolute;
+  left: 50%;
+  top: 22%;
+  width: 28%;
+  height: 52%;
+  transform: translateX(-50%);
+  border-radius: 30% / 14%;
+  background: radial-gradient(circle at 50% 14%, hsla(var(--ink), 0.12) 0%, transparent 34%),
+    radial-gradient(circle at 50% 88%, hsla(var(--ink), 0.10) 0%, transparent 40%);
+  box-shadow: inset 0 0 10px hsla(var(--ink), 0.08), 0 0 0 1px hsla(var(--ink), 0.05);
+}
+.temple-pillar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 10%;
+  background: linear-gradient(180deg, hsl(var(--seal) / 0.85), hsl(var(--seal-deep) / 0.85));
+  box-shadow: inset 0 0 18px hsla(var(--ink), 0.15);
+}
+.temple-pillar--left { left: 6%; }
+.temple-pillar--right { right: 6%; }
+.temple-door {
+  position: absolute;
+  bottom: 0;
+  left: 32%;
+  width: 36%;
+  height: 55%;
+  background: linear-gradient(180deg, hsl(var(--ink) / 0.72), hsl(var(--ink) / 0.55));
+  border-radius: 8px 8px 0 0;
+  box-shadow: inset 0 0 12px hsla(var(--ink), 0.25);
+  overflow: hidden;
+}
+.temple-door::before {
+  content: "";
+  position: absolute;
+  inset: 14% 20% auto 20%;
+  height: 15%;
+  background: radial-gradient(circle at 50% 50%, hsl(var(--gold) / 0.8) 0%, transparent 62%);
+}
+.temple-lintel {
+  position: absolute;
+  top: 12%;
+  left: 14%;
+  right: 14%;
+  height: 6%;
+  background: linear-gradient(90deg, hsl(var(--seal) / 0.7), hsl(var(--seal-deep) / 0.8));
+  box-shadow: inset 0 0 12px hsla(var(--ink), 0.12);
+}
+.temple-roof-tier {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  background: radial-gradient(circle at 50% 40%, hsl(var(--seal) / 0.98) 0%, hsl(var(--seal-deep) / 0.98) 100%);
+  box-shadow: 0 12px 28px hsl(0 0% 0% / 0.28);
+}
+.temple-roof-tier::before {
+  content: "";
+  position: absolute;
+  inset: 8%;
+  border-radius: inherit;
+  background: radial-gradient(circle at 40% 35%, hsla(0, 0%, 100%, 0.18) 0%, transparent 38%),
+    radial-gradient(circle at 60% 55%, hsla(var(--ink), 0.08) 0%, transparent 42%);
+}
+.temple-roof-tier--upper {
+  background: radial-gradient(circle at 50% 40%, hsl(4 78% 62%) 0%, hsl(var(--seal-deep)) 100%);
+}
+.temple-roof-tier--upper::before {
+  content: "";
+  position: absolute;
+  inset: 10%;
+  border-radius: inherit;
+  background: radial-gradient(circle at 35% 30%, hsla(0, 0%, 100%, 0.2) 0%, transparent 42%);
+}
+.temple-finial {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 26px;
+  margin-left: -5px;
+  margin-top: -26px;
+  border-radius: 4px;
+  background: hsl(var(--gold));
+  box-shadow: 0 0 10px hsl(var(--gold) / 0.5), inset 0 0 6px hsl(var(--seal) / 0.25);
+}
+.temple-base {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 999px;
+  background: hsl(var(--ink) / 0.12);
+  filter: blur(3px);
+}
+
+/* ---------- Certifications: active-cert text swap + progress dots ---------- */
+.cert-active-panel {
+  animation: cert-fade-in 0.6s ease;
+}
+@keyframes cert-fade-in {
+  0%   { opacity: 0; transform: translateY(8px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.cert-progress-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: hsl(var(--seal));
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.sun-moon {
+  transition: transform 300ms ease;
+}
+.sun-moon:hover {
+  transform: scale(1.08);
+}
+.sun-moon-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  transition: opacity 1.8s ease;
+  pointer-events: none;
+}
+
+/* ---------- Fireflies (night mode) ---------- */
+.firefly-drift {
+  animation-name: firefly-wander;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+.firefly-twinkle {
+  border-radius: 999px;
+  background: radial-gradient(circle, hsl(55 90% 72%) 0%, hsl(55 85% 60% / 0.5) 55%, hsl(55 85% 60% / 0) 100%);
+  animation-name: firefly-twinkle;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  will-change: opacity, transform;
+}
+@keyframes firefly-wander {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(3vw, -2vh); }
+  50%  { transform: translate(-2vw, -4vh); }
+  75%  { transform: translate(-3vw, 1vh); }
+  100% { transform: translate(0, 0); }
+}
+@keyframes firefly-twinkle {
+  0%, 100% { opacity: 0.15; transform: scale(0.8); }
+  50%      { opacity: 1;    transform: scale(1.15); }
+}
+
+/* ---------- Ink-wash transitions & ambient layers ---------- */
+.blossom-petal {
+  border-radius: 50% 0 50% 0;
+  background: radial-gradient(circle at 30% 30%, hsl(var(--card) / 0.95), hsl(var(--seal) / 0.4));
+  box-shadow: inset 0 0 10px hsl(var(--card) / 0.2);
+  animation-name: blossom-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.wind-line {
+  border-top: 1px dashed hsl(var(--ink) / 0.16);
+  transform-origin: left center;
+  animation-name: wind-drift;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.bamboo-stalk {
+  stroke-linecap: round;
+  animation: bamboo-sway 5.4s ease-in-out infinite;
+  transform-origin: 120px 500px;
+}
+
+.bamboo-leaf {
+  stroke-linecap: round;
+  animation: bamboo-sway 5.1s ease-in-out infinite reverse;
+  transform-origin: 120px 340px;
+}
+
+.dragonfly-flight {
+  animation: dragonfly-drift 7s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.project-temple {
+  position: absolute;
+  bottom: 2rem;
+  width: 24vw;
+  max-width: 220px;
+  height: 27vh;
+  border: 1px solid hsl(var(--border) / 0.8);
+  background: linear-gradient(180deg, hsl(var(--paper-aged) / 0.45), hsl(var(--paper-deep) / 0.25));
+  box-shadow: inset 0 0 0 1px hsl(var(--card) / 0.5);
+  clip-path: polygon(50% 0%, 100% 35%, 100% 100%, 0 100%, 0 35%);
+  opacity: 0.45;
+}
+
+.temple-one { left: 4%; transform: rotate(-6deg); }
+.temple-two { right: 4%; transform: rotate(6deg); }
+
+.stepping-stones {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at 20% 80%, hsl(var(--seal) / 0.18) 0 10px, transparent 11px),
+    radial-gradient(circle at 45% 75%, hsl(var(--ink) / 0.12) 0 10px, transparent 11px),
+    radial-gradient(circle at 70% 82%, hsl(var(--seal) / 0.14) 0 10px, transparent 11px),
+    radial-gradient(circle at 90% 76%, hsl(var(--ink) / 0.1) 0 10px, transparent 11px);
+  background-size: 18% 18%, 24% 24%, 22% 22%, 16% 16%;
+  background-position: 0 100%, 20% 100%, 55% 100%, 86% 100%;
+  background-repeat: no-repeat;
+  opacity: 0.8;
+}
+
+.moonlit-lake {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 85%, hsl(var(--card) / 0.7) 0 18%, transparent 19%),
+    linear-gradient(180deg, transparent 0%, hsl(var(--paper-aged) / 0.25) 100%);
+  opacity: 0.7;
+}
+
+@keyframes blossom-fall {
+  0% { transform: translate3d(0, -12vh, 0) rotate(0deg) scale(0.7); opacity: 0; }
+  20% { opacity: 0.7; }
+  100% { transform: translate3d(0, 110vh, 0) rotate(360deg) scale(1.05); opacity: 0; }
+}
+
+@keyframes wind-drift {
+  0%, 100% { transform: translateX(-6%) skewX(0deg); }
+  50% { transform: translateX(6%) skewX(8deg); }
+}
+
+@keyframes bamboo-sway {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(2.5deg); }
+}
+
+@keyframes dragonfly-drift {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  50% { transform: translate3d(24px, -10px, 0) rotate(6deg); }
+}
 
 @layer utilities {
   .ink-shadow {

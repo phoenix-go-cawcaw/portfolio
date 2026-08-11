@@ -7,10 +7,12 @@ import Certifications from "@/components/portfolio/Certifications";
 // import Testimonials from "@/components/portfolio/Testimonials";
 import Contact from "@/components/portfolio/Contact";
 import ContactRail from "@/components/portfolio/ContactRail";
+import AmbientWorld from "@/components/ambient/AmbientWorld";
 
 const Index = () => {
   return (
     <main className="relative min-h-screen overflow-x-hidden bg-background">
+      <AmbientWorld />
       <TopNav />
       <Hero />
       <About />

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTheme } from "../../context/ThemeContext";
 import craneBottom from "../../assets/crane bottom.png";
 import craneMid from "../../assets/crane mid.png";
 import craneHigh from "../../assets/crane high.png";
@@ -67,8 +68,14 @@ const CraneBird = ({ opacity, flapDuration }: { opacity: number; flapDuration: n
 };
 
 const Cranes = () => {
+  const { theme } = useTheme();
+
   return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
+    <div
+      className="absolute inset-0 pointer-events-none overflow-hidden transition-opacity ease-in-out"
+      style={{ opacity: theme === "dark" ? 0 : 1, transitionDuration: "1500ms" }}
+      aria-hidden="true"
+    >
       {CRANES.map((c) => (
         <div
           key={c.id}

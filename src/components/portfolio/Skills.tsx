@@ -1,6 +1,9 @@
+import { useRef } from "react";
 import SectionHeader from "./SectionHeader";
 import BrushDivider from "./BrushDivider";
 import Reveal from "@/components/Reveal";
+import WaterRippleSection, { type WaterRippleHandle } from "./WaterRippleSection";
+import BambooForest from "./BambooForest";
 
 const skills = [
   { zh: "构", title: "Front-end Architecture", desc: "Polished React & TypeScript experiences with responsive motion." },
@@ -23,9 +26,17 @@ const list = [
 
 const Skills = () => {
   void skills;
+  const rippleRef = useRef<WaterRippleHandle>(null);
+
   return (
-    <section id="skills" className="section-pad relative">
-      <div className="container-elegant">
+    <section id="skills" className="section-snap relative overflow-hidden bg-background">
+      {/* Ripple canvas — invisible (transparent) until a card is hovered */}
+      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+        <WaterRippleSection ref={rippleRef} heightClassName="h-full" className="border-0 rounded-none" />
+        <BambooForest />
+      </div>
+
+      <div className="container-elegant relative z-10">
         <SectionHeader number="一" titleEn="Skills & Expertise" titleZh="技艺" />
         <Reveal>
           <BrushDivider className="mb-12" />
@@ -33,7 +44,18 @@ const Skills = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
           {list.map((s, i) => (
             <Reveal key={s.title} delay={i * 80}>
-              <div className="paper-card p-7 h-full flex flex-col">
+              <div
+                className="paper-card p-7 h-full flex flex-col"
+                onMouseEnter={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  rippleRef.current?.rippleAt(
+                    rect.left + rect.width / 2,
+                    rect.top + rect.height / 2,
+                    4.5,
+                    35
+                  );
+                }}
+              >
                 <div className="flex items-start justify-between mb-5">
                   <span className="font-zh text-3xl font-bold text-ink leading-none">{s.zh}</span>
                   <span className="font-zh-sans text-[0.6rem] tracking-[0.3em] uppercase text-ink-muted mt-1">

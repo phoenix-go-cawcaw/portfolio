@@ -3,7 +3,6 @@ import SectionHeader from "./SectionHeader";
 import BrushDivider from "./BrushDivider";
 import Reveal from "../Reveal";
 import CloudReveal from "./CloudReveal";
-import KoiPond from "./KoiPond";
 import DistantDragon from "./DistantDragon";
 import { ridgePath } from "../../lib/ridgePath";
 
@@ -18,7 +17,7 @@ const About = () => {
   const ridgeD = useMemo(() => ridgePath(VILLAGE_RIDGE, 200), []);
 
   return (
-    <section id="about" className="section-pad relative overflow-hidden">
+    <section id="about" className="section-snap relative overflow-hidden">
       {/* Village backdrop: faint ridge + occasional dragon behind it */}
       <div className="absolute inset-x-0 bottom-0 h-[45%] pointer-events-none" aria-hidden="true">
         <DistantDragon />
@@ -75,14 +74,6 @@ const About = () => {
               </p>
             </Reveal>
 
-            <Reveal delay={320} className="pt-4">
-              <div className="paper-card p-6 max-w-md">
-                <p className="font-zh-sans text-[0.6rem] tracking-[0.35em] uppercase text-ink-muted mb-3">
-                  the village pond
-                </p>
-                <KoiPond />
-              </div>
-            </Reveal>
           </div>
         </div>
       </div>

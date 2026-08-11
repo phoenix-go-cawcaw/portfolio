@@ -8,8 +8,11 @@ const links = [
 ];
 
 const Contact = () => (
-  <section id="contact" className="section-pad relative">
-    <div className="container-elegant text-center">
+    <section id="contact" className="section-snap relative overflow-hidden">
+    <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+      <div className="moonlit-lake" />
+    </div>
+    <div className="container-elegant relative z-10 text-center">
       <Reveal>
         <p className="font-zh-sans text-[0.7rem] tracking-[0.55em] uppercase text-ink-muted mb-5">
           联系我 · Get in touch

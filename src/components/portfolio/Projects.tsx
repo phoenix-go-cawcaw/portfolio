@@ -74,8 +74,8 @@ const Projects = () => {
   }, [open]);
 
   return (
-    <section id="projects" className="section-pad relative">
-      <div className="container-elegant">
+    <section id="projects" className="section-snap relative">
+      <div className="container-elegant relative z-10">
         <SectionHeader number="二" titleEn="Project Scrolls" titleZh="项目卷轴" />
         <Reveal>
           <BrushDivider className="mb-12" />
