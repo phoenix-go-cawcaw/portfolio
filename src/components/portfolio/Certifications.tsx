@@ -1,5 +1,4 @@
 import SectionHeader from "./SectionHeader";
-import BrushDivider from "./BrushDivider";
 import Reveal from "@/components/Reveal";
 
 const placeholderCerts = [
@@ -10,9 +9,6 @@ const Certifications = () => (
   <section id="certifications" className="section-snap relative overflow-hidden">
     <div className="container-elegant relative z-10">
       <SectionHeader number="三" titleEn="Certifications" titleZh="证书" />
-      <Reveal>
-        <BrushDivider className="mb-12" />
-      </Reveal>
       <div className="paper-card relative overflow-hidden">
         {placeholderCerts.map((certificate, index) => (
           <Reveal key={`${certificate.name}-${index}`} delay={index * 70}>

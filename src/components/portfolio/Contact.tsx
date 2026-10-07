@@ -29,7 +29,7 @@ const Contact = () => (
         </p>
       </Reveal>
       <Reveal delay={220}>
-        <BrushDivider className="mb-10" />
+        <BrushDivider className="mb-7 md:mb-8" />
       </Reveal>
 
       <Reveal delay={300}>
@@ -49,7 +49,7 @@ const Contact = () => (
       </Reveal>
     </div>
 
-    <footer className="container-elegant mt-24 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-3">
+    <footer className="container-elegant mt-12 md:mt-16 pt-6 border-t border-border flex flex-col md:flex-row items-center justify-between gap-3">
       <span className="font-zh text-xs tracking-[0.3em] text-ink-muted">
         凤凰 · 作品集 · {new Date().getFullYear()}
       </span>

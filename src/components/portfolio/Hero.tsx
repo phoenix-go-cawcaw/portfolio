@@ -90,16 +90,21 @@ const Hero = () => {
         </g>
       </svg>
 
-      {/* English translation on the left; original Chinese phrase on the right. */}
-      <div
-        className="hidden md:flex absolute left-8 lg:left-10 top-1/2 -translate-y-1/2 flex-col items-center gap-2 font-en text-xs tracking-[0.12em] text-ink-muted"
-        aria-label="Between brush and ink"
+      <button
+        type="button"
+        aria-label="笔墨之间 — Between brush and ink"
+        className="group absolute left-6 lg:left-10 top-1/2 -translate-y-1/2 hidden md:flex items-center border-0 bg-transparent p-2 text-ink-muted"
       >
-        <span>Between</span><span>brush</span><span>and</span><span>ink</span>
-      </div>
-      <div className="hidden md:flex absolute right-10 top-1/2 -translate-y-1/2 flex-col gap-4 font-zh text-base font-light text-ink-muted">
-        <span>笔</span><span>墨</span><span>之</span><span>间</span>
-      </div>
+        <span className="flex flex-col gap-4 font-zh text-base font-light">
+          <span>笔</span><span>墨</span><span>之</span><span>间</span>
+        </span>
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute left-full ml-3 whitespace-nowrap font-en text-sm tracking-wide opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100"
+        >
+          Between brush and ink
+        </span>
+      </button>
 
       <div ref={contentRef} className="relative z-10 text-center px-6 animate-fade-up will-change-transform">
         <p className="font-zh-sans text-[0.7rem] tracking-[0.55em] uppercase text-ink-muted mb-6">

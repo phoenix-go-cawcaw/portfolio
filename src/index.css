@@ -231,16 +231,15 @@
     @apply py-24 md:py-32;
   }
 
-  /* Viewport-filling section for snap-scroll — each one becomes a
-     distinct "painting" panel. Tighter padding on mobile (py-10 vs
-     py-16) so cards don't overflow the viewport on small screens. */
+  /* Leave room for the fixed navigation while keeping snap sections balanced. */
   .section-snap {
-    @apply min-h-screen flex flex-col justify-center py-10 md:py-24;
+    @apply min-h-screen flex flex-col justify-center;
+    padding: 5rem 0 1.5rem;
   }
 
   /* ---------- Section header (number / titles / line) ---------- */
   .section-header {
-    @apply flex items-end gap-6 md:gap-8 mb-14 md:mb-20;
+    @apply flex items-end gap-6 md:gap-8 mb-8 md:mb-10;
   }
   .section-number {
     @apply font-zh text-5xl md:text-6xl font-light leading-none;
@@ -327,7 +326,7 @@
 
   /* ---------- Project tile (clean scroll-inspired) ---------- */
   .project-tile {
-    @apply relative block w-full text-left p-7 md:p-8;
+    @apply relative block w-full text-left p-5 md:p-6;
     background: hsl(var(--card));
     border: 1px solid hsl(var(--border));
     transition: transform var(--transition-elegant), box-shadow var(--transition-elegant), border-color var(--transition-elegant);

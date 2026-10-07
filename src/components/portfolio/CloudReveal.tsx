@@ -36,7 +36,7 @@ const CloudReveal = ({ photoSrc, photoAlt = "Phoenix" }: Props) => {
   return (
     <div
       ref={ref}
-      className="relative mx-auto aspect-square w-full max-w-[240px] overflow-hidden rounded-full border border-ink/15 shadow-[0_12px_32px_hsl(var(--ink)/0.12)]"
+      className="relative mx-auto aspect-square w-40 sm:w-44 lg:w-full max-w-[240px] overflow-hidden rounded-full border border-ink/15 shadow-[0_12px_32px_hsl(var(--ink)/0.12)]"
     >
       {/* Portrait, or the ink medallion fallback */}
       <div className="absolute inset-0 flex items-center justify-center bg-paper-aged">
