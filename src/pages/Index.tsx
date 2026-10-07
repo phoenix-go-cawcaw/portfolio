@@ -1,7 +1,7 @@
 import TopNav from "@/components/portfolio/TopNav";
 import Hero from "@/components/portfolio/Hero";
 import About from "@/components/portfolio/About";
-import Skills from "@/components/portfolio/Skills";
+// import Skills from "@/components/portfolio/Skills"; // Backlog: restore after the stepping-stone redesign.
 import Projects from "@/components/portfolio/Projects";
 import Certifications from "@/components/portfolio/Certifications";
 // import Testimonials from "@/components/portfolio/Testimonials";
@@ -16,7 +16,7 @@ const Index = () => {
       <TopNav />
       <Hero />
       <About />
-      <Skills />
+      {/* <Skills /> */}
       <Projects />
       <Certifications />
       {/* <Testimonials /> */}

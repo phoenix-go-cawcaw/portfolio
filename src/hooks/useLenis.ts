@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import Lenis from "@studio-freight/lenis";
 import { setLenisInstance, setStopJumpHandler } from "../lib/lenisController";
 
-const STOPS = ["hero", "about", "skills", "projects", "certifications", "contact"];
+const STOPS = ["hero", "about", "projects", "certifications", "contact"];
 
 function getInitialStopIndex(): number {
   const midY = window.scrollY + window.innerHeight / 2;

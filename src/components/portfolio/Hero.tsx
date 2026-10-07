@@ -3,16 +3,10 @@ import Cranes from "./Cranes";
 import SunMoon from "./SunMoon";
 import { jumpToStop } from "../../lib/lenisController";
 
-// Per-layer scroll speed and mouse-parallax strength, farthest → closest
-const LAYER_SCROLL_SPEED = [0.05, 0.14, 0.26];
-const LAYER_MOUSE_STRENGTH = [3, 9, 18];
-
 const Hero = () => {
-  const layerRefs = useRef<(HTMLElement | null)[]>([]);
   const mistRef = useRef<SVGSVGElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const sealRef = useRef<HTMLDivElement>(null);
-  const mouseXRef = useRef(0);
 
   useEffect(() => {
     let raf = 0;
@@ -21,11 +15,6 @@ const Hero = () => {
 
     const onScroll = () => {
       target = window.scrollY;
-    };
-
-    const onMouseMove = (e: MouseEvent) => {
-      // Normalize to roughly -1..1 across the viewport width
-      mouseXRef.current = (e.clientX / window.innerWidth - 0.5) * 2;
     };
 
     const start = performance.now();
@@ -39,15 +28,6 @@ const Hero = () => {
       const driftY = Math.sin(elapsed * 0.18) * 6;       // gentle vertical sway
       const driftX = Math.sin(elapsed * 0.12) * 4;       // gentle lateral sway
       const sealDrift = Math.sin(elapsed * 0.22) * 1.4;  // tiny seal breath
-
-      // Six mountain layers, each with its own scroll speed and mouse
-      // parallax strength — closer layers (higher index) move more.
-      layerRefs.current.forEach((layer, i) => {
-        if (!layer) return;
-        const ty = current * LAYER_SCROLL_SPEED[i] + driftY * (0.4 + i * 0.12);
-        const tx = driftX * (0.5 + i * 0.1) + mouseXRef.current * LAYER_MOUSE_STRENGTH[i];
-        layer.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
-      });
 
       if (contentRef.current) {
         const t = Math.min(current / 600, 1);
@@ -67,11 +47,9 @@ const Hero = () => {
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("mousemove", onMouseMove, { passive: true });
     raf = requestAnimationFrame(tick);
     return () => {
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("mousemove", onMouseMove);
       cancelAnimationFrame(raf);
     };
   }, []);
@@ -112,13 +90,16 @@ const Hero = () => {
         </g>
       </svg>
 
-      {/* Vertical Chinese banner */}
-      <div className="hidden md:flex absolute left-10 top-1/2 -translate-y-1/2 flex-col gap-4 font-zh text-base font-light text-ink-muted">
+      {/* English translation on the left; original Chinese phrase on the right. */}
+      <div
+        className="hidden md:flex absolute left-8 lg:left-10 top-1/2 -translate-y-1/2 flex-col items-center gap-2 font-en text-xs tracking-[0.12em] text-ink-muted"
+        aria-label="Between brush and ink"
+      >
+        <span>Between</span><span>brush</span><span>and</span><span>ink</span>
+      </div>
+      <div className="hidden md:flex absolute right-10 top-1/2 -translate-y-1/2 flex-col gap-4 font-zh text-base font-light text-ink-muted">
         <span>笔</span><span>墨</span><span>之</span><span>间</span>
       </div>
-      {/* <div className="hidden md:flex absolute right-10 top-1/2 -translate-y-1/2 flex-col gap-4 font-zh text-base font-light text-ink-muted">
-        <span>意</span><span>在</span><span>象</span><span>外</span>
-      </div> */}
 
       <div ref={contentRef} className="relative z-10 text-center px-6 animate-fade-up will-change-transform">
         <p className="font-zh-sans text-[0.7rem] tracking-[0.55em] uppercase text-ink-muted mb-6">

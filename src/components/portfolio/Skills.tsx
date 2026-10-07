@@ -3,19 +3,8 @@ import SectionHeader from "./SectionHeader";
 import BrushDivider from "./BrushDivider";
 import Reveal from "@/components/Reveal";
 import WaterRippleSection, { type WaterRippleHandle } from "./WaterRippleSection";
-import BambooForest from "./BambooForest";
 
 const skills = [
-  { zh: "构", title: "Front-end Architecture", desc: "Polished React & TypeScript experiences with responsive motion." },
-  { zh: "design", titleZh: "design", title: "Design Systems", desc: "Reusable patterns that feel intentional, accessible, and alive.", zhChar: "系" },
-  { zh: "动", title: "Animation & Motion", desc: "Parallax, timing, and fluid transitions tuned for elegant journeys." },
-  { zh: "速", title: "Performance", desc: "Minimal bundles, fast loading, silky runtime across devices." },
-  { zh: "意", title: "Visual Storytelling", desc: "Chinese textures, poetic spacing, cinematic web compositions." },
-  { zh: "合", title: "Collaboration", desc: "Clear communication, product focus, thoughtful teamwork." },
-];
-
-// normalize
-const list = [
   { zh: "构", title: "Front-end Architecture", desc: "Polished React & TypeScript experiences with responsive motion." },
   { zh: "系", title: "Design Systems", desc: "Reusable patterns that feel intentional, accessible, and alive." },
   { zh: "动", title: "Animation & Motion", desc: "Parallax, timing, and fluid transitions tuned for elegant journeys." },
@@ -25,7 +14,6 @@ const list = [
 ];
 
 const Skills = () => {
-  void skills;
   const rippleRef = useRef<WaterRippleHandle>(null);
 
   return (
@@ -33,7 +21,6 @@ const Skills = () => {
       {/* Ripple canvas — invisible (transparent) until a card is hovered */}
       <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
         <WaterRippleSection ref={rippleRef} heightClassName="h-full" className="border-0 rounded-none" />
-        <BambooForest />
       </div>
 
       <div className="container-elegant relative z-10">
@@ -42,7 +29,7 @@ const Skills = () => {
           <BrushDivider className="mb-12" />
         </Reveal>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
-          {list.map((s, i) => (
+          {skills.map((s, i) => (
             <Reveal key={s.title} delay={i * 80}>
               <div
                 className="paper-card p-7 h-full flex flex-col"

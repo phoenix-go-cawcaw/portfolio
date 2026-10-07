@@ -1,36 +1,11 @@
-import { useMemo } from "react";
 import SectionHeader from "./SectionHeader";
 import BrushDivider from "./BrushDivider";
 import Reveal from "../Reveal";
 import CloudReveal from "./CloudReveal";
-import DistantDragon from "./DistantDragon";
-import { ridgePath } from "../../lib/ridgePath";
-
-// A single faint, distant ridgeline for the village — the dragon (drawn
-// beneath it) dips behind this shape as it drifts, so it reads as
-// "circling behind the mountains" rather than floating in empty space.
-const VILLAGE_RIDGE: [number, number][] = [
-  [0, 150], [200, 108], [400, 142], [600, 92], [800, 132], [1000, 98], [1200, 138], [1440, 112],
-];
 
 const About = () => {
-  const ridgeD = useMemo(() => ridgePath(VILLAGE_RIDGE, 200), []);
-
   return (
     <section id="about" className="section-snap relative overflow-hidden">
-      {/* Village backdrop: faint ridge + occasional dragon behind it */}
-      <div className="absolute inset-x-0 bottom-0 h-[45%] pointer-events-none" aria-hidden="true">
-        <DistantDragon />
-        <svg
-          className="absolute inset-x-0 bottom-0 w-full h-full"
-          viewBox="0 0 1440 200"
-          preserveAspectRatio="xMidYMax slice"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path d={ridgeD} fill="hsl(var(--ink) / 0.055)" />
-        </svg>
-      </div>
-
       <div className="container-elegant relative z-10">
         <SectionHeader number="一" titleEn="Philosophy & Practice" titleZh="道与行" />
         <Reveal>

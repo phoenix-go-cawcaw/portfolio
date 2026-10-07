@@ -8,9 +8,8 @@ import { jumpToStop } from "../../lib/lenisController";
 const items = [
   { id: "hero", en: "Home", zh: "首" },
   { id: "about", en: "About", zh: "我" },
-  { id: "skills", en: "Skills", zh: "艺" },
   { id: "projects", en: "Works", zh: "作" },
-  { id: "certifications", en: "Honours", zh: "证" },
+  { id: "certifications", en: "Certifications", zh: "证" },
   { id: "contact", en: "Contact", zh: "联" },
 ];
 
