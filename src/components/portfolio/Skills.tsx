@@ -32,11 +32,12 @@ const Skills = () => {
               className="skill-stone"
               onPointerEnter={(event) => {
                 const rect = event.currentTarget.getBoundingClientRect();
-                rippleRef.current?.rippleAt(rect.left + rect.width / 2, rect.top + rect.height / 2, 5, 38);
+                rippleRef.current?.rippleAt(rect.left + rect.width / 2, rect.top + rect.height / 2, 4.5, 35);
               }}
               onFocus={(event) => {
+                if (!event.currentTarget.matches(":focus-visible")) return;
                 const rect = event.currentTarget.getBoundingClientRect();
-                rippleRef.current?.rippleAt(rect.left + rect.width / 2, rect.top + rect.height / 2, 5, 38);
+                rippleRef.current?.rippleAt(rect.left + rect.width / 2, rect.top + rect.height / 2, 4.5, 35);
               }}
             >
               {skill}

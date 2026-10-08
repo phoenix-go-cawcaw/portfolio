@@ -14,9 +14,9 @@ import { useEffect, useRef, forwardRef, useImperativeHandle } from "react";
  * shadows deepen it. Color comes from whatever sits behind the canvas.
  */
 
-const SIM_SIZE = 64;
+const SIM_SIZE = 48;
 const DAMPING = 0.94;
-const MAX_FRAMES = 90;
+const MAX_FRAMES = 60;
 const FRAME_INTERVAL = 1000 / 30;
 
 export interface WaterRippleHandle {
@@ -193,7 +193,7 @@ const WaterRippleSection = forwardRef<WaterRippleHandle, Props>(
         <canvas
           ref={canvasRef}
           className="absolute inset-0 w-full h-full"
-          style={{ mixBlendMode: "soft-light" }}
+          style={{ mixBlendMode: "soft-light", opacity: 0.3 }}
         />
       </div>
     );
