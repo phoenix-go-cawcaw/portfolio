@@ -1,8 +1,8 @@
 import SectionHeader from "./SectionHeader";
 import Reveal from "@/components/Reveal";
 
-const placeholderCerts = [
-  { name: "Placeholder certification", issuer: "To be added", year: "TBD" },
+const certifications = [
+  { name: "Artificial Intelligence on Microsoft Azure", issuer: "Coursera", year: "2026" },
 ];
 
 const Certifications = () => (
@@ -10,7 +10,7 @@ const Certifications = () => (
     <div className="container-elegant relative z-10">
       <SectionHeader number="三" titleEn="Certifications" titleZh="证书" />
       <div className="paper-card relative overflow-hidden">
-        {placeholderCerts.map((certificate, index) => (
+        {certifications.map((certificate, index) => (
           <Reveal key={`${certificate.name}-${index}`} delay={index * 70}>
             <div className="cert-row opacity-80">
               <span className="cert-dot" />

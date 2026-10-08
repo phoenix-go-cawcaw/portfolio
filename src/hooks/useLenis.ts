@@ -43,6 +43,16 @@ export function useLenis() {
       lenis.scrollTo(el, { offset: 0, duration: 0.8, onComplete: () => { animating = false; } });
     };
     const onWheel = (e: WheelEvent) => {
+      const nestedScroll = e.target instanceof Element
+        ? e.target.closest<HTMLElement>("[data-native-scroll]")
+        : null;
+      if (
+        nestedScroll &&
+        ((e.deltaY > 0 && nestedScroll.scrollTop + nestedScroll.clientHeight < nestedScroll.scrollHeight - 1) ||
+          (e.deltaY < 0 && nestedScroll.scrollTop > 0))
+      ) {
+        return;
+      }
       e.preventDefault();
       if (animating) return;
       snapTo(activeIndexRef.current + (e.deltaY > 0 ? 1 : -1));
