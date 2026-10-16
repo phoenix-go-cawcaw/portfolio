@@ -134,7 +134,7 @@ const Hero = () => {
             View Works
           </a>
           <a
-            href="/PhoenixChungCV.pdf"
+            href="/Phoenix_Chung_CV.pdf"
             download
             className="font-zh-sans text-xs tracking-[0.3em] uppercase border border-seal text-seal px-6 py-3 hover:bg-seal hover:text-seal-foreground transition-colors"
           >

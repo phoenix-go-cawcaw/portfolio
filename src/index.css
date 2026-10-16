@@ -391,6 +391,7 @@
   .skill-pond {
     min-height: 19rem;
     padding: 1rem 0.5rem;
+    isolation: isolate;
     border: 1px solid hsl(var(--jade) / 0.2);
     border-radius: 46% 54% 42% 58% / 7% 10% 8% 9%;
     background:
@@ -482,6 +483,18 @@
     border-color: hsl(var(--border) / 0.7);
   }
   .cert-row:hover { background: hsl(var(--paper-aged) / 0.5); }
+  .cert-disclosure-summary {
+    cursor: pointer;
+    list-style: none;
+    transition: background-color var(--transition-elegant);
+  }
+  .cert-disclosure-summary::-webkit-details-marker { display: none; }
+  .cert-disclosure-summary:focus-visible {
+    outline: 2px solid hsl(var(--seal));
+    outline-offset: -2px;
+  }
+  .cert-disclosure-icon { transition: transform 200ms ease; }
+  .cert-disclosure[open] .cert-disclosure-icon { transform: rotate(180deg); }
   .cert-dot {
     width: 10px; height: 10px; border-radius: 999px;
     background: hsl(var(--seal));

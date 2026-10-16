@@ -1,10 +1,33 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import SectionHeader from "./SectionHeader";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const projects = [
-  { name: "Life Choices Chronicle Blog", role: "Blog" },
-  { name: "LC Studio Rebuild", role: "Website rebuild" },
-  { name: "Sirius Dream:Lumina", role: "QA Tester" },
+  {
+    name: "LC Chronicle Blog",
+    role: "Blog",
+    description: "I worked as one of two developers on the LC Chronicle Blog.",
+    url: "https://chronicle.lifechoices.co.za",
+  },
+  {
+    name: "LC Studio",
+    role: "Website rebuild",
+    description: "I worked as one of five developers on the LC Studio rebuild.",
+    url: "https://profiles.lcstudio.co.za",
+  },
+  {
+    name: "Sirius Dream: Lumina",
+    role: "QA Tester",
+    description:
+      "I worked in a team of five QA testers covering five different roles, and tested the intern role.",
+    url: "https://lumina.siriusdream.co.za",
+  },
 ];
 const initialActiveProject = Math.floor(projects.length / 2);
 
@@ -15,6 +38,7 @@ interface Props {
 const Projects = ({ children }: Props) => {
   const slotRef = useRef<HTMLDivElement>(null);
   const [activeProject, setActiveProject] = useState(initialActiveProject);
+  const [selectedProject, setSelectedProject] = useState<(typeof projects)[number] | null>(null);
 
   useEffect(() => {
     const slot = slotRef.current;
@@ -60,7 +84,7 @@ const Projects = ({ children }: Props) => {
       <div className="container-elegant relative z-10">
         <SectionHeader number="二" titleEn="Projects & Skills" titleZh="项目与技艺" />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] gap-8 md:gap-10 items-start">
           <section aria-labelledby="project-scrolls-title" className="min-w-0">
             <div className="mb-3 flex items-end justify-between gap-3">
               <div>
@@ -99,7 +123,8 @@ const Projects = ({ children }: Props) => {
                       opacity: distance === 0 ? 1 : distance === 1 ? 0.42 : 0.16,
                       transform: `scale(${distance === 0 ? 1 : distance === 1 ? 0.96 : 0.92})`,
                     }}
-                    onClick={() => centerProject(index)}
+                    aria-haspopup="dialog"
+                    onClick={() => setSelectedProject(project)}
                   >
                     <span className="font-en text-lg md:text-xl font-medium">{project.name}</span>
                     <span className="font-zh-sans text-[0.6rem] tracking-[0.25em] uppercase text-ink-muted">
@@ -116,6 +141,39 @@ const Projects = ({ children }: Props) => {
           </div>
         </div>
       </div>
+
+      <Dialog
+        open={selectedProject !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedProject(null);
+        }}
+      >
+        <DialogContent className="border-[hsl(var(--border))] bg-[hsl(var(--card))] p-7 sm:p-9">
+          {selectedProject && (
+            <>
+              <DialogHeader className="space-y-3 text-left">
+                <p className="font-zh-sans text-[0.6rem] tracking-[0.3em] uppercase text-ink-muted">
+                  {selectedProject.role}
+                </p>
+                <DialogTitle className="font-en text-2xl font-medium text-ink">
+                  {selectedProject.name}
+                </DialogTitle>
+                <DialogDescription className="font-en text-base leading-relaxed text-ink-soft">
+                  {selectedProject.description}
+                </DialogDescription>
+              </DialogHeader>
+              <a
+                href={selectedProject.url}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex w-fit items-center gap-2 border-b border-[hsl(var(--seal)/0.45)] pb-1 font-en text-sm text-ink transition-colors hover:text-[hsl(var(--seal))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--seal))]"
+              >
+                View live project <span aria-hidden="true">↗</span>
+              </a>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 };
