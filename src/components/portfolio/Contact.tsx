@@ -2,7 +2,7 @@ import Reveal from "@/components/Reveal";
 import BrushDivider from "./BrushDivider";
 
 const links = [
-  { label: "Email", href: "https://mail.google.com/mail/?view=cm&fs=1&to=jojoeydenver@gmail.com" },
+  { label: "Email", href: "https://mail.google.com/mail/?view=cm&fs=1&to=19hoenix@gmail.com" },
   { label: "GitHub", href: "https://github.com/phoenix-go-cawcaw" },
   { label: "LinkedIn", href: "https://www.linkedin.com/in/phoenixchun" },
 ];

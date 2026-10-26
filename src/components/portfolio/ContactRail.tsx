@@ -10,8 +10,8 @@ const contactItems = [
   },
   {
     label: "Email",
-    value: "jojoeydenver@gmail.com",
-    href: "mailto:jojoeydenver@gmail.com",
+    value: "19hoenix@gmail.com",
+    href: "mailto:19hoenix@gmail.com",
     Icon: Mail,
   },
 ];
