@@ -310,6 +310,68 @@
     box-shadow: 0 4px 8px hsl(var(--ink) / 0.06), 0 18px 40px hsl(var(--ink) / 0.10);
   }
 
+  /* Aged, torn-paper backdrop for the Philosophy section only. */
+  #about .philosophy-paper {
+    position: relative;
+    isolation: isolate;
+    width: 100%;
+    min-height: 13rem;
+    margin-inline: auto;
+    padding: 2.75rem 2.25rem 2.5rem;
+    clip-path: polygon(
+      0.8% 3.5%, 3% 1.8%, 7% 3.2%, 11% 1.4%, 16% 2.8%, 21% 1.2%, 27% 2.5%,
+      33% 0.8%, 39% 2.2%, 45% 1.1%, 51% 2.4%, 57% 0.9%, 63% 2.1%, 69% 1.2%,
+      75% 2.8%, 81% 1.1%, 87% 2.5%, 93% 1.4%, 99.2% 3.2%, 98.6% 10%,
+      99.4% 17%, 98.7% 25%, 99.3% 34%, 98.5% 43%, 99.5% 52%, 98.8% 61%,
+      99.2% 70%, 98.4% 79%, 99.3% 88%, 98.7% 96.5%, 94% 97.8%, 89% 96.3%,
+      84% 98.2%, 78% 96.8%, 72% 98.5%, 66% 97.2%, 60% 99%, 54% 97.5%,
+      48% 98.8%, 42% 97.1%, 36% 98.4%, 30% 96.9%, 24% 98.6%, 18% 97.2%,
+      12% 98.3%, 7% 96.8%, 2% 98%, 1.2% 91%, 0.5% 83%, 1.3% 74%,
+      0.7% 65%, 1.4% 56%, 0.6% 47%, 1.2% 38%, 0.5% 29%, 1.3% 20%, 0.7% 11%
+    );
+    background:
+      radial-gradient(ellipse at 14% 18%, hsl(var(--ink) / 0.055) 0 1.2%, transparent 8%),
+      radial-gradient(ellipse at 82% 72%, hsl(var(--gold) / 0.12) 0 1%, transparent 10%),
+      radial-gradient(ellipse at 54% 38%, hsl(var(--paper-deep) / 0.16), transparent 32%),
+      repeating-linear-gradient(0deg, hsl(var(--ink) / 0.018) 0 1px, transparent 1px 5px),
+      linear-gradient(145deg, hsl(var(--paper-aged) / 0.98), hsl(var(--paper) / 0.96) 48%, hsl(var(--paper-aged) / 0.98));
+    filter: drop-shadow(0 10px 16px hsl(var(--ink) / 0.10));
+  }
+
+  #about .philosophy-paper::before,
+  #about .philosophy-paper::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  #about .philosophy-paper::before {
+    border-top: 1px solid hsl(var(--ink) / 0.12);
+    border-bottom: 1px solid hsl(var(--ink) / 0.10);
+  }
+
+  #about .philosophy-paper::after {
+    opacity: 0.32;
+    background:
+      linear-gradient(93deg, hsl(var(--ink) / 0.10), transparent 3%, transparent 97%, hsl(var(--ink) / 0.08)),
+      radial-gradient(circle at 20% 90%, hsl(var(--ink) / 0.08) 0 0.5%, transparent 4%),
+      radial-gradient(circle at 78% 10%, hsl(var(--ink) / 0.06) 0 0.4%, transparent 3%);
+  }
+
+  #about .philosophy-paper p {
+    position: relative;
+    z-index: 1;
+  }
+
+  @media (max-width: 640px) {
+    #about .philosophy-paper {
+      min-height: 18rem;
+      padding: 2.25rem 1.45rem 2.1rem;
+    }
+  }
+
   /* ---------- Top nav ---------- */
   .top-nav {
     @apply fixed top-0 inset-x-0 z-40;
