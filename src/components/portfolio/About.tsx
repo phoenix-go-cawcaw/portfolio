@@ -9,7 +9,7 @@ const About = () => {
 
         <Reveal delay={80} className="philosophy-paper">
           <p className="font-en text-base sm:text-lg md:text-xl leading-relaxed md:leading-relaxed text-ink-soft">
-            Rooted in my Chinese heritage, I approach software as a modern expression of
+            Approaching software as a modern expression of
             ink and craft: balanced, intentional, and quietly resilient. I create responsive,
             accessible digital experiences with modern web technologies and database-driven
             interfaces, bringing end-to-end quality assurance to every detail. By tracing bugs,
